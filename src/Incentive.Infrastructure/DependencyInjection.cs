@@ -20,7 +20,7 @@ namespace Incentive.Infrastructure
         {
             // Add DbContext
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
             // Add Identity
@@ -39,12 +39,12 @@ namespace Incentive.Infrastructure
             // Add JWT Authentication
             var jwtSettings = configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["Secret"];
-            
+
             if (string.IsNullOrEmpty(secretKey))
             {
                 throw new InvalidOperationException("JWT Secret is not configured");
             }
-            
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

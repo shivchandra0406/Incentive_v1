@@ -6,6 +6,7 @@ using Incentive.Core.Common;
 using Incentive.Core.Entities;
 using Incentive.Infrastructure.Identity;
 using Incentive.Infrastructure.MultiTenancy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,28 @@ namespace Incentive.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Set default schema for Identity tables
+            builder.HasDefaultSchema("dbo");
+
+            // Configure schemas for different entity types
+            builder.Entity<AppUser>().ToTable("Users", "Identity");
+            builder.Entity<AppRole>().ToTable("Roles", "Identity");
+            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles", "Identity");
+            builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims", "Identity");
+            builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins", "Identity");
+            builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims", "Identity");
+            builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", "Identity");
+
+            // Configure schemas for business entities
+            builder.Entity<Tenant>().ToTable("Tenants", "Tenant");
+
+            // IncentiveManagement schema
+            builder.Entity<Salesperson>().ToTable("Salespeople", "IncentiveManagement");
+            builder.Entity<Project>().ToTable("Projects", "IncentiveManagement");
+            builder.Entity<Booking>().ToTable("Bookings", "IncentiveManagement");
+            builder.Entity<IncentiveRule>().ToTable("IncentiveRules", "IncentiveManagement");
+            builder.Entity<IncentiveEarning>().ToTable("IncentiveEarnings", "IncentiveManagement");
 
             // Apply entity configurations
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

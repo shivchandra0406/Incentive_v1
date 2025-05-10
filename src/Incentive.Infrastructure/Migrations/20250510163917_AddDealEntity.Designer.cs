@@ -4,6 +4,7 @@ using Incentive.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Incentive.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250510163917_AddDealEntity")]
+    partial class AddDealEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("dbo")
                 .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -95,7 +97,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("SalespersonId");
 
-                    b.ToTable("Bookings", "IncentiveManagement");
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.IncentiveEarning", b =>
@@ -159,7 +161,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("SalespersonId");
 
-                    b.ToTable("IncentiveEarnings", "IncentiveManagement");
+                    b.ToTable("IncentiveEarnings");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.IncentiveRule", b =>
@@ -275,7 +277,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("IncentiveRules", "IncentiveManagement");
+                    b.ToTable("IncentiveRules");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.Project", b =>
@@ -339,7 +341,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", "IncentiveManagement");
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.Salesperson", b =>
@@ -407,7 +409,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Salespeople", "IncentiveManagement");
+                    b.ToTable("Salespeople");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.Tenant", b =>
@@ -455,7 +457,7 @@ namespace Incentive.Infrastructure.Migrations
                     b.HasIndex("Identifier")
                         .IsUnique();
 
-                    b.ToTable("Tenants", "Tenant");
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("Incentive.Infrastructure.Identity.AppRole", b =>
@@ -504,7 +506,7 @@ namespace Incentive.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("Roles", "Identity");
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("Incentive.Infrastructure.Identity.AppUser", b =>
@@ -605,7 +607,7 @@ namespace Incentive.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("Users", "Identity");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -630,7 +632,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RoleClaims", "Identity");
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -655,7 +657,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClaims", "Identity");
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -677,7 +679,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLogins", "Identity");
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -692,7 +694,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", "Identity");
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -711,7 +713,7 @@ namespace Incentive.Infrastructure.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("UserTokens", "Identity");
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.Booking", b =>

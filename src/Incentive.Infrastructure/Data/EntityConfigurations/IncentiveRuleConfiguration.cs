@@ -31,6 +31,27 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
             builder.Property(r => r.MaxBookingValue)
                 .HasColumnType("decimal(18,2)");
 
+            // New properties
+            builder.Property(r => r.Frequency)
+                .HasMaxLength(50)
+                .HasDefaultValue("Monthly");
+
+            builder.Property(r => r.AppliedTo)
+                .HasMaxLength(50)
+                .HasDefaultValue("User");
+
+            builder.Property(r => r.CurrencyType)
+                .HasMaxLength(10)
+                .HasDefaultValue("USD");
+
+            builder.Property(r => r.TargetType)
+                .HasMaxLength(50)
+                .HasDefaultValue("ItemBased");
+
+            builder.Property(r => r.IncentiveType)
+                .HasMaxLength(50)
+                .HasDefaultValue("Percentage");
+
             builder.Property(r => r.StartDate)
                 .IsRequired();
 

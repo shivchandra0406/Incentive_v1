@@ -22,14 +22,9 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
                 .HasConversion<string>();
 
             // Configure relationships
-            builder.HasOne(i => i.Booking)
-                .WithOne(b => b.IncentiveEarning)
-                .HasForeignKey<IncentiveEarning>(i => i.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(i => i.Salesperson)
-                .WithMany(s => s.IncentiveEarnings)
-                .HasForeignKey(i => i.SalespersonId)
+            builder.HasOne(i => i.Deal)
+                .WithMany(d => d.IncentiveEarnings)
+                .HasForeignKey(i => i.DealId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(i => i.IncentiveRule)

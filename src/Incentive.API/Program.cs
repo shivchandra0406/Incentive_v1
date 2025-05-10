@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddApplicationServices(builder.Configuration);
+// Use only one of the service extension methods to avoid duplicate registrations
+builder.Services.AddNewApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -22,7 +23,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-app.UseApplicationMiddleware(app.Environment.IsDevelopment());
+// Use only one of the middleware extension methods to avoid duplicate registrations
+app.UseNewApplicationMiddleware(app.Environment.IsDevelopment());
 
 app.UseAuthentication();
 app.UseAuthorization();

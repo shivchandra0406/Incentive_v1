@@ -10,7 +10,7 @@ namespace Incentive.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     public class TenantsController : ControllerBase
     {
         private readonly ITenantService _tenantService;
@@ -40,6 +40,7 @@ namespace Incentive.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<Tenant>> CreateTenant([FromBody] Tenant tenant)
         {
             var exists = await _tenantService.TenantExistsAsync(tenant.Identifier);
@@ -61,7 +62,7 @@ namespace Incentive.API.Controllers
                 return NotFound();
             }
 
-            tenant.Id = Guid.Parse(id);
+            tenant.Id = id;
             var success = await _tenantService.UpdateTenantAsync(tenant);
             if (!success)
             {
@@ -90,7 +91,6 @@ namespace Incentive.API.Controllers
         }
 
         [HttpGet("current")]
-        [AllowAnonymous]
         public ActionResult<string> GetCurrentTenant()
         {
             var tenantId = _tenantService.GetCurrentTenantId();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
@@ -27,6 +28,11 @@ namespace Incentive.Application.Services
         public async Task<(bool Succeeded, string UserId, string Message)> RegisterAsync(string userName, string email, string password, string firstName, string lastName, string tenantId)
         {
             return await _identityService.CreateUserAsync(userName, email, password, firstName, lastName, tenantId);
+        }
+
+        public async Task<(bool Succeeded, string UserId, string Message)> RegisterWithRolesAsync(string userName, string email, string password, string firstName, string lastName, string tenantId, IEnumerable<string> roles)
+        {
+            return await _identityService.CreateUserWithRolesAsync(userName, email, password, firstName, lastName, tenantId, roles);
         }
 
         public async Task<bool> ValidateTokenAsync(string token)

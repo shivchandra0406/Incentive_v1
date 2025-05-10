@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Incentive.Core.Common;
+using Incentive.Core.Enums;
 
 namespace Incentive.Core.Entities
 {
@@ -10,42 +12,61 @@ namespace Incentive.Core.Entities
     /// </summary>
     public class IncentiveRule : SoftDeletableEntity
     {
+        [Required]
+        [StringLength(200)]
         public string Name { get; set; }
+
+        [StringLength(500)]
         public string Description { get; set; }
 
-        // Original properties
-        public Guid? ProjectId { get; set; }
-        public IncentiveType Type { get; set; }
-        public decimal Value { get; set; }
-        public decimal? MinBookingValue { get; set; }
-        public decimal? MaxBookingValue { get; set; }
+        [Required]
+        public TargetFrequency Frequency { get; set; }
 
-        // New properties from the provided model
-        public string Frequency { get; set; } // Will be mapped to TargetFrequency enum
-        public string AppliedTo { get; set; } // Will be mapped to AppliedRuleType enum
-        public string CurrencyType { get; set; }
-        public string TargetType { get; set; } // Will be mapped to TargetType enum
-        public string IncentiveType { get; set; } // Will be mapped to IncentiveCalculationType enum
+        [Required]
+        public AppliedRuleType AppliedTo { get; set; }
 
-        public DateTime StartDate { get; set; }
+        [Required]
+        public CurrencyType Currency { get; set; }
+
+        [Required]
+        public TargetType Target { get; set; }
+
+        [Required]
+        public IncentiveCalculationType Incentive { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? TargetValue { get; set; }
+
+        public int? TargetDealCount { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? Commission { get; set; }
+
+        public DateTime? StartDate { get; set; }
+
         public DateTime? EndDate { get; set; }
+
         public bool IsActive { get; set; } = true;
 
-        // Navigation properties
-        public virtual Project Project { get; set; }
-        public virtual ICollection<IncentiveEarning> IncentiveEarnings { get; set; } = new List<IncentiveEarning>();
+        public bool IsIncludeSalary { get; set; } = true;
 
-        // User relationship
-        public string UserId { get; set; }
+        // Minimum requirements to qualify for incentive
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? MinimumSalesThreshold { get; set; }
 
-        // Team relationship (if we implement teams later)
+        public int? MinimumDealCountThreshold { get; set; }
+
+        // Maximum incentive caps
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? MaximumIncentiveAmount { get; set; }
+
+        // User or Team that this rule applies to
+        public string? UserId { get; set; }
+
         public Guid? TeamId { get; set; }
-    }
 
-    // Moving this enum to Enums folder
-    public enum IncentiveType
-    {
-        Percentage,
-        FixedAmount
+        // Navigation properties
+        public virtual ICollection<IncentiveEarning> IncentiveEarnings { get; set; } = new List<IncentiveEarning>();
+        public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
     }
 }

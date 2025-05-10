@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Incentive.Application.DTOs;
 using Incentive.Core.Interfaces;
@@ -54,13 +55,14 @@ namespace Incentive.API.Controllers
                 });
             }
 
-            var result = await _authService.RegisterAsync(
+            var result = await _authService.RegisterWithRolesAsync(
                 registerDto.UserName,
                 registerDto.Email,
                 registerDto.Password,
                 registerDto.FirstName,
                 registerDto.LastName,
-                registerDto.TenantId);
+                registerDto.TenantId,
+                registerDto.Roles.Count > 0 ? registerDto.Roles : new List<string> { "Admin" });
 
             if (!result.Succeeded)
             {

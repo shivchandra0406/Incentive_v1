@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Incentive.Core.Entities;
+using Incentive.Core.Enums;
 using Incentive.Core.Interfaces;
 
 namespace Incentive.Application.Services
@@ -16,22 +17,22 @@ namespace Incentive.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IncentiveEarning> CalculateIncentiveAsync(Guid bookingId)
+        public async Task<IncentiveEarning> CalculateIncentiveAsync(Guid dealId, string userId)
         {
-            var booking = await _unitOfWork.Repository<Booking>().GetByIdAsync(bookingId);
-            if (booking == null)
+            var deal = await _unitOfWork.Repository<Deal>().GetByIdAsync(dealId);
+            if (deal == null)
             {
-                throw new Exception($"Booking with ID {bookingId} not found");
+                throw new Exception($"Deal with ID {dealId} not found");
             }
 
-            if (booking.Status != BookingStatus.Confirmed)
+            if (deal.Status != DealStatus.Won && deal.Status != DealStatus.FullyPaid)
             {
-                throw new Exception("Incentives can only be calculated for confirmed bookings");
+                throw new Exception("Incentives can only be calculated for won or fully paid deals");
             }
 
-            // Check if incentive already exists for this booking
+            // Check if incentive already exists for this user and deal
             var existingIncentive = _unitOfWork.Repository<IncentiveEarning>().AsQueryable()
-                .FirstOrDefault(i => i.BookingId == bookingId);
+                .FirstOrDefault(i => i.UserId == userId && i.DealId == dealId);
 
             if (existingIncentive != null)
             {
@@ -40,39 +41,42 @@ namespace Incentive.Application.Services
 
             // Find applicable incentive rule
             var incentiveRules = _unitOfWork.Repository<IncentiveRule>().AsQueryable()
-                .Where(r => r.IsActive && 
-                           (r.ProjectId == booking.ProjectId || r.ProjectId == null) &&
-                           r.StartDate <= booking.BookingDate &&
-                           (r.EndDate == null || r.EndDate >= booking.BookingDate) &&
-                           (r.MinBookingValue == null || r.MinBookingValue <= booking.BookingValue) &&
-                           (r.MaxBookingValue == null || r.MaxBookingValue >= booking.BookingValue))
-                .OrderByDescending(r => r.ProjectId != null) // Prioritize project-specific rules
-                .ThenByDescending(r => r.Value) // Then by highest value
+                .Where(r => r.IsActive &&
+                           (r.StartDate == null || r.StartDate <= deal.DealDate) &&
+                           (r.EndDate == null || r.EndDate >= deal.DealDate) &&
+                           (r.MinimumSalesThreshold == null || r.MinimumSalesThreshold <= deal.TotalAmount))
+                .OrderByDescending(r => r.Commission) // Then by highest commission
                 .ToList();
 
             if (!incentiveRules.Any())
             {
-                throw new Exception("No applicable incentive rules found for this booking");
+                throw new Exception("No applicable incentive rules found for this deal");
             }
 
             var rule = incentiveRules.First();
-            
+
             // Calculate incentive amount
             decimal amount = 0;
-            if (rule.Type == IncentiveType.Percentage)
+            if (rule.Incentive == IncentiveCalculationType.Percentage)
             {
-                amount = booking.BookingValue * (rule.Value / 100);
+                amount = deal.TotalAmount * (rule.Commission ?? 0) / 100;
             }
             else // Fixed amount
             {
-                amount = rule.Value;
+                amount = rule.Commission ?? 0;
+            }
+
+            // Apply maximum cap if specified
+            if (rule.MaximumIncentiveAmount.HasValue && amount > rule.MaximumIncentiveAmount.Value)
+            {
+                amount = rule.MaximumIncentiveAmount.Value;
             }
 
             // Create incentive earning
             var incentiveEarning = new IncentiveEarning
             {
-                BookingId = bookingId,
-                SalespersonId = booking.SalespersonId,
+                DealId = dealId,
+                UserId = userId,
                 IncentiveRuleId = rule.Id,
                 Amount = amount,
                 EarningDate = DateTime.UtcNow,
@@ -109,6 +113,7 @@ namespace Incentive.Application.Services
             }
 
             incentiveEarning.Status = IncentiveEarningStatus.Rejected;
+            incentiveEarning.Notes = reason;
             await _unitOfWork.Repository<IncentiveEarning>().UpdateAsync(incentiveEarning);
             await _unitOfWork.SaveChangesAsync();
 
@@ -129,6 +134,7 @@ namespace Incentive.Application.Services
             }
 
             incentiveEarning.Status = IncentiveEarningStatus.Paid;
+            incentiveEarning.IsPaid = true;
             incentiveEarning.PaidDate = DateTime.UtcNow;
             await _unitOfWork.Repository<IncentiveEarning>().UpdateAsync(incentiveEarning);
             await _unitOfWork.SaveChangesAsync();
@@ -136,22 +142,19 @@ namespace Incentive.Application.Services
             return incentiveEarning;
         }
 
-        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsBySalespersonAsync(Guid salespersonId)
+        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByUserAsync(string userId)
         {
-            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => i.SalespersonId == salespersonId);
+            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => i.UserId == userId);
         }
 
-        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByProjectAsync(Guid projectId)
+        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByDealAsync(Guid dealId)
         {
-            var bookings = await _unitOfWork.Repository<Booking>().GetAsync(b => b.ProjectId == projectId);
-            var bookingIds = bookings.Select(b => b.Id).ToList();
-            
-            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => bookingIds.Contains(i.BookingId));
+            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => i.DealId == dealId);
         }
 
         public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => 
+            return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i =>
                 i.EarningDate >= startDate && i.EarningDate <= endDate);
         }
     }

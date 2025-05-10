@@ -39,12 +39,12 @@ namespace Incentive.Infrastructure
             // Add JWT Authentication
             var jwtSettings = configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["Secret"];
-            
+
             if (string.IsNullOrEmpty(secretKey))
             {
                 throw new InvalidOperationException("JWT Secret is not configured");
             }
-            
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -68,16 +68,48 @@ namespace Incentive.Infrastructure
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
+                // Role-based policies
                 options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Admin", "Manager"));
                 options.AddPolicy("RequireFinanceRole", policy => policy.RequireRole("Admin", "Finance"));
+
+                // Permission-based policies
+                options.AddPolicy("ViewUsers", policy => policy.RequireClaim("Permission", Permissions.ViewUsers));
+                options.AddPolicy("CreateUsers", policy => policy.RequireClaim("Permission", Permissions.CreateUsers));
+                options.AddPolicy("EditUsers", policy => policy.RequireClaim("Permission", Permissions.EditUsers));
+                options.AddPolicy("DeleteUsers", policy => policy.RequireClaim("Permission", Permissions.DeleteUsers));
+
+                options.AddPolicy("ViewRoles", policy => policy.RequireClaim("Permission", Permissions.ViewRoles));
+                options.AddPolicy("CreateRoles", policy => policy.RequireClaim("Permission", Permissions.CreateRoles));
+                options.AddPolicy("EditRoles", policy => policy.RequireClaim("Permission", Permissions.EditRoles));
+                options.AddPolicy("DeleteRoles", policy => policy.RequireClaim("Permission", Permissions.DeleteRoles));
+
+                options.AddPolicy("ViewTenants", policy => policy.RequireClaim("Permission", Permissions.ViewTenants));
+                options.AddPolicy("CreateTenants", policy => policy.RequireClaim("Permission", Permissions.CreateTenants));
+                options.AddPolicy("EditTenants", policy => policy.RequireClaim("Permission", Permissions.EditTenants));
+                options.AddPolicy("DeleteTenants", policy => policy.RequireClaim("Permission", Permissions.DeleteTenants));
+
+                options.AddPolicy("ViewIncentiveRules", policy => policy.RequireClaim("Permission", Permissions.ViewIncentiveRules));
+                options.AddPolicy("CreateIncentiveRules", policy => policy.RequireClaim("Permission", Permissions.CreateIncentiveRules));
+                options.AddPolicy("EditIncentiveRules", policy => policy.RequireClaim("Permission", Permissions.EditIncentiveRules));
+                options.AddPolicy("DeleteIncentiveRules", policy => policy.RequireClaim("Permission", Permissions.DeleteIncentiveRules));
+
+                options.AddPolicy("ViewDeals", policy => policy.RequireClaim("Permission", Permissions.ViewDeals));
+                options.AddPolicy("CreateDeals", policy => policy.RequireClaim("Permission", Permissions.CreateDeals));
+                options.AddPolicy("EditDeals", policy => policy.RequireClaim("Permission", Permissions.EditDeals));
+                options.AddPolicy("DeleteDeals", policy => policy.RequireClaim("Permission", Permissions.DeleteDeals));
             });
 
             // Add Repositories
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IIncentiveRuleRepository, IncentiveRuleRepository>();
+            services.AddScoped<IDealRepository, DealRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IDealActivityRepository, DealActivityRepository>();
 
             // Add Services
+            services.AddScoped<UserClaimManager>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<ITenantService, TenantService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -85,6 +117,9 @@ namespace Incentive.Infrastructure
 
             // Add HttpContextAccessor
             services.AddHttpContextAccessor();
+
+            // Add Identity Data Seeder
+            services.AddIdentityDataSeeder();
 
             return services;
         }

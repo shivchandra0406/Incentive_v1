@@ -1,4 +1,5 @@
 using Incentive.Core.Entities;
+using Incentive.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,41 +13,57 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
 
             builder.Property(r => r.Name)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(200);
 
             builder.Property(r => r.Description)
                 .HasMaxLength(500);
 
-            builder.Property(r => r.Type)
+            builder.Property(r => r.Frequency)
                 .IsRequired()
                 .HasConversion<string>();
 
-            builder.Property(r => r.Value)
+            builder.Property(r => r.AppliedTo)
                 .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(r => r.Currency)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(r => r.Target)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(r => r.Incentive)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(r => r.TargetValue)
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(r => r.MinBookingValue)
+            builder.Property(r => r.Commission)
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(r => r.MaxBookingValue)
+            builder.Property(r => r.MinimumSalesThreshold)
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(r => r.StartDate)
-                .IsRequired();
+            builder.Property(r => r.MaximumIncentiveAmount)
+                .HasColumnType("decimal(18,2)");
 
             builder.Property(r => r.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);
 
-            // Configure relationships
-            builder.HasOne(r => r.Project)
-                .WithMany(p => p.IncentiveRules)
-                .HasForeignKey(r => r.ProjectId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(r => r.IsIncludeSalary)
+                .IsRequired()
+                .HasDefaultValue(true);
 
-            builder.HasMany(r => r.IncentiveEarnings)
-                .WithOne(i => i.IncentiveRule)
-                .HasForeignKey(i => i.IncentiveRuleId)
+            // No Project relationship
+
+            // Configure relationship with Deal
+            builder.HasMany(r => r.Deals)
+                .WithOne(d => d.AssignedRule)
+                .HasForeignKey(d => d.IncentiveRuleId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

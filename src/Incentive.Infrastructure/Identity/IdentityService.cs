@@ -9,6 +9,7 @@ using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,17 +21,20 @@ namespace Incentive.Infrastructure.Identity
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly IConfiguration _configuration;
+        private readonly UserClaimManager _userClaimManager;
 
         public IdentityService(
             UserManager<AppUser> userManager,
             RoleManager<AppRole> roleManager,
             IAuthorizationService authorizationService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            UserClaimManager userClaimManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _authorizationService = authorizationService;
             _configuration = configuration;
+            _userClaimManager = userClaimManager;
         }
 
         public async Task<(bool Succeeded, string UserId, string Message)> CreateUserAsync(string userName, string email, string password, string firstName, string lastName, string tenantId)
@@ -42,10 +46,45 @@ namespace Incentive.Infrastructure.Identity
                 FirstName = firstName,
                 LastName = lastName,
                 TenantId = tenantId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "system"
             };
 
-            return await CreateUserAsync(appUser, password);
+            var result = await CreateUserAsync(appUser, password);
+
+            // Assign Admin role by default
+            if (result.Succeeded)
+            {
+                await AddUserToRoleAsync(result.UserId, "Admin");
+            }
+
+            return result;
+        }
+
+        public async Task<(bool Succeeded, string UserId, string Message)> CreateUserWithRolesAsync(string userName, string email, string password, string firstName, string lastName, string tenantId, IEnumerable<string> roles)
+        {
+            var appUser = new ApplicationUser
+            {
+                UserName = userName,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                TenantId = tenantId,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "system"
+            };
+
+            var result = await CreateUserAsync(appUser, password);
+
+            if (result.Succeeded && roles != null)
+            {
+                foreach (var role in roles)
+                {
+                    await AddUserToRoleAsync(result.UserId, role);
+                }
+            }
+
+            return result;
         }
 
         public async Task<(bool Succeeded, string UserId, string Message)> CreateUserAsync(ApplicationUser appUser, string password)
@@ -219,6 +258,13 @@ namespace Incentive.Infrastructure.Identity
             }
 
             var result = await _userManager.AddToRoleAsync(user, role);
+
+            if (result.Succeeded)
+            {
+                // Synchronize user claims with role permissions
+                await _userClaimManager.SynchronizeUserClaimsAsync(userId);
+            }
+
             return result.Succeeded;
         }
 
@@ -232,6 +278,13 @@ namespace Incentive.Infrastructure.Identity
             }
 
             var result = await _userManager.RemoveFromRoleAsync(user, role);
+
+            if (result.Succeeded)
+            {
+                // Synchronize user claims with role permissions
+                await _userClaimManager.SynchronizeUserClaimsAsync(userId);
+            }
+
             return result.Succeeded;
         }
 
@@ -245,6 +298,148 @@ namespace Incentive.Infrastructure.Identity
             }
 
             return await _userManager.GetRolesAsync(user);
+        }
+
+        public async Task<IList<ApplicationUser>> GetAllUsersAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            return users.Select(MapToApplicationUser).ToList();
+        }
+
+        public async Task<(bool Succeeded, string RoleId, string Message)> CreateRoleAsync(string name, string description, string tenantId)
+        {
+            var role = new AppRole
+            {
+                Name = name,
+                Description = description,
+                TenantId = tenantId,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "system"
+            };
+
+            var result = await _roleManager.CreateAsync(role);
+
+            if (result.Succeeded)
+            {
+                return (true, role.Id, "Role created successfully");
+            }
+
+            return (false, string.Empty, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task<bool> UpdateRoleAsync(string roleId, string name, string description)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            role.Name = name;
+            role.Description = description;
+            role.LastModifiedAt = DateTime.UtcNow;
+            role.LastModifiedBy = "system";
+
+            var result = await _roleManager.UpdateAsync(role);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> DeleteRoleAsync(string roleId)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            var result = await _roleManager.DeleteAsync(role);
+            return result.Succeeded;
+        }
+
+        public async Task<ApplicationRole> GetRoleByIdAsync(string roleId)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return null;
+            }
+
+            return MapToApplicationRole(role);
+        }
+
+        public async Task<ApplicationRole> GetRoleByNameAsync(string roleName)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                return null;
+            }
+
+            return MapToApplicationRole(role);
+        }
+
+        public async Task<IList<ApplicationRole>> GetAllRolesAsync()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            return roles.Select(MapToApplicationRole).ToList();
+        }
+
+        public async Task<bool> AddClaimToRoleAsync(string roleId, string claimType, string claimValue)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            var claim = new Claim(claimType, claimValue);
+            var result = await _roleManager.AddClaimAsync(role, claim);
+
+            if (result.Succeeded && role.Name != null)
+            {
+                // Synchronize claims for all users in this role
+                await _userClaimManager.SynchronizeUsersInRoleAsync(role.Name);
+            }
+
+            return result.Succeeded;
+        }
+
+        public async Task<bool> RemoveClaimFromRoleAsync(string roleId, string claimType, string claimValue)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            var claim = new Claim(claimType, claimValue);
+            var result = await _roleManager.RemoveClaimAsync(role, claim);
+
+            if (result.Succeeded && role.Name != null)
+            {
+                // Synchronize claims for all users in this role
+                await _userClaimManager.SynchronizeUsersInRoleAsync(role.Name);
+            }
+
+            return result.Succeeded;
+        }
+
+        public async Task<IList<Claim>> GetRoleClaimsAsync(string roleId)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return new List<Claim>();
+            }
+
+            return await _roleManager.GetClaimsAsync(role);
         }
 
         private async Task<(string Token, DateTime Expiration)> GenerateJwtToken(AppUser user)
@@ -349,6 +544,21 @@ namespace Incentive.Infrastructure.Identity
                 LastModifiedBy = user.LastModifiedBy,
                 RefreshToken = user.RefreshToken,
                 RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+            };
+        }
+
+        private ApplicationRole MapToApplicationRole(AppRole role)
+        {
+            return new ApplicationRole
+            {
+                Id = role.Id,
+                Name = role.Name,
+                TenantId = role.TenantId,
+                Description = role.Description,
+                CreatedAt = role.CreatedAt,
+                CreatedBy = role.CreatedBy,
+                LastModifiedAt = role.LastModifiedAt,
+                LastModifiedBy = role.LastModifiedBy
             };
         }
     }

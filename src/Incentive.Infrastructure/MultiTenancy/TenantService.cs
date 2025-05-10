@@ -58,7 +58,7 @@ namespace Incentive.Infrastructure.MultiTenancy
             {
                 var tenant = new Tenant
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.NewGuid().ToString(),
                     Name = name,
                     Identifier = identifier,
                     ConnectionString = connectionString,

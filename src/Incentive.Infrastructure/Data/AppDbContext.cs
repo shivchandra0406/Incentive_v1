@@ -6,6 +6,7 @@ using Incentive.Core.Common;
 using Incentive.Core.Entities;
 using Incentive.Infrastructure.Identity;
 using Incentive.Infrastructure.MultiTenancy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,15 +27,37 @@ namespace Incentive.Infrastructure.Data
         }
 
         public DbSet<Tenant> Tenants { get; set; }
-        public DbSet<Salesperson> Salespeople { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<Booking> Bookings { get; set; }
         public DbSet<IncentiveRule> IncentiveRules { get; set; }
         public DbSet<IncentiveEarning> IncentiveEarnings { get; set; }
+        public DbSet<Deal> Deals { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<DealActivity> DealActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Set default schema for Identity tables
+            builder.HasDefaultSchema("dbo");
+
+            // Configure schemas for different entity types
+            builder.Entity<AppUser>().ToTable("Users", "Identity");
+            builder.Entity<AppRole>().ToTable("Roles", "Identity");
+            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles", "Identity");
+            builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims", "Identity");
+            builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins", "Identity");
+            builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims", "Identity");
+            builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", "Identity");
+
+            // Configure schemas for business entities
+            builder.Entity<Tenant>().ToTable("Tenants", "Tenant");
+
+            // IncentiveManagement schema
+            builder.Entity<IncentiveRule>().ToTable("IncentiveRules", "IncentiveManagement");
+            builder.Entity<IncentiveEarning>().ToTable("IncentiveEarnings", "IncentiveManagement");
+            builder.Entity<Deal>().ToTable("Deals", "IncentiveManagement");
+            builder.Entity<Payment>().ToTable("Payments", "IncentiveManagement");
+            builder.Entity<DealActivity>().ToTable("DealActivities", "IncentiveManagement");
 
             // Apply entity configurations
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

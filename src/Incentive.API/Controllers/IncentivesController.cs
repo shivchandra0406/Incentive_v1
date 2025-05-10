@@ -20,25 +20,32 @@ namespace Incentive.API.Controllers
             _incentiveService = incentiveService;
         }
 
-        [HttpPost("calculate/{bookingId}")]
-        public async Task<IActionResult> CalculateIncentive(Guid bookingId)
+        [HttpPost("calculate/{dealId}")]
+        public async Task<IActionResult> CalculateIncentive(Guid dealId)
         {
             try
             {
-                var incentiveEarning = await _incentiveService.CalculateIncentiveAsync(bookingId);
-                
+                // Get the current user ID from the claims
+                var userId = User.Identity?.Name ?? User.FindFirst("sub")?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest("User ID could not be determined");
+                }
+
+                var incentiveEarning = await _incentiveService.CalculateIncentiveAsync(dealId, userId);
+
                 var incentiveDto = new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
                     PaidDate = incentiveEarning.PaidDate
                 };
-                
+
                 return Ok(incentiveDto);
             }
             catch (Exception ex)
@@ -54,19 +61,19 @@ namespace Incentive.API.Controllers
             try
             {
                 var incentiveEarning = await _incentiveService.ApproveIncentiveAsync(incentiveEarningId);
-                
+
                 var incentiveDto = new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
                     PaidDate = incentiveEarning.PaidDate
                 };
-                
+
                 return Ok(incentiveDto);
             }
             catch (Exception ex)
@@ -82,19 +89,19 @@ namespace Incentive.API.Controllers
             try
             {
                 var incentiveEarning = await _incentiveService.RejectIncentiveAsync(incentiveEarningId, reason);
-                
+
                 var incentiveDto = new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
                     PaidDate = incentiveEarning.PaidDate
                 };
-                
+
                 return Ok(incentiveDto);
             }
             catch (Exception ex)
@@ -110,19 +117,19 @@ namespace Incentive.API.Controllers
             try
             {
                 var incentiveEarning = await _incentiveService.MarkAsPaidAsync(incentiveEarningId);
-                
+
                 var incentiveDto = new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
                     PaidDate = incentiveEarning.PaidDate
                 };
-                
+
                 return Ok(incentiveDto);
             }
             catch (Exception ex)
@@ -131,19 +138,19 @@ namespace Incentive.API.Controllers
             }
         }
 
-        [HttpGet("by-salesperson/{salespersonId}")]
-        public async Task<IActionResult> GetBySalesperson(Guid salespersonId)
+        [HttpGet("by-user/{userId}")]
+        public async Task<IActionResult> GetByUser(string userId)
         {
-            var incentiveEarnings = await _incentiveService.GetIncentiveEarningsBySalespersonAsync(salespersonId);
-            
+            var incentiveEarnings = await _incentiveService.GetIncentiveEarningsByUserAsync(userId);
+
             var incentiveDtos = new List<IncentiveEarningDto>();
             foreach (var incentiveEarning in incentiveEarnings)
             {
                 incentiveDtos.Add(new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
@@ -151,23 +158,23 @@ namespace Incentive.API.Controllers
                     PaidDate = incentiveEarning.PaidDate
                 });
             }
-            
+
             return Ok(incentiveDtos);
         }
 
-        [HttpGet("by-project/{projectId}")]
-        public async Task<IActionResult> GetByProject(Guid projectId)
+        [HttpGet("by-deal/{dealId}")]
+        public async Task<IActionResult> GetByDeal(Guid dealId)
         {
-            var incentiveEarnings = await _incentiveService.GetIncentiveEarningsByProjectAsync(projectId);
-            
+            var incentiveEarnings = await _incentiveService.GetIncentiveEarningsByDealAsync(dealId);
+
             var incentiveDtos = new List<IncentiveEarningDto>();
             foreach (var incentiveEarning in incentiveEarnings)
             {
                 incentiveDtos.Add(new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
@@ -175,7 +182,7 @@ namespace Incentive.API.Controllers
                     PaidDate = incentiveEarning.PaidDate
                 });
             }
-            
+
             return Ok(incentiveDtos);
         }
 
@@ -183,15 +190,15 @@ namespace Incentive.API.Controllers
         public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             var incentiveEarnings = await _incentiveService.GetIncentiveEarningsByDateRangeAsync(startDate, endDate);
-            
+
             var incentiveDtos = new List<IncentiveEarningDto>();
             foreach (var incentiveEarning in incentiveEarnings)
             {
                 incentiveDtos.Add(new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
-                    BookingId = incentiveEarning.BookingId,
-                    SalespersonId = incentiveEarning.SalespersonId,
+                    DealId = incentiveEarning.DealId,
+                    UserId = incentiveEarning.UserId,
                     IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
@@ -199,7 +206,7 @@ namespace Incentive.API.Controllers
                     PaidDate = incentiveEarning.PaidDate
                 });
             }
-            
+
             return Ok(incentiveDtos);
         }
     }

@@ -40,8 +40,7 @@ namespace Incentive.API.Controllers
                 Succeeded = true,
                 Token = result.Token,
                 RefreshToken = result.RefreshToken,
-                Expiration = result.Expiration,
-                UserId = 
+                Expiration = result.Expiration 
             });
         }
 

@@ -37,13 +37,23 @@ namespace Incentive.Infrastructure.Repositories
 
         public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _dbContext.Set<T>().AddAsync(entity, cancellationToken);
-            return entity;
+            try
+            {
+                await _dbContext.Set<T>().AddAsync(entity, cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                return entity;
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                throw new Exception($"Error adding entity of type {typeof(T).Name}: {innerMessage}", ex);
+            }
         }
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync(cancellationToken);
             await Task.CompletedTask;
         }
 

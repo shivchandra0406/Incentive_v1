@@ -10,7 +10,8 @@ namespace Incentive.Core.Entities
     /// <summary>
     /// Represents an incentive rule that can be applied to users or teams
     /// </summary>
-    public class IncentiveRule : SoftDeletableEntity
+    [Schema("IncentiveManagement")]
+    public class IncentiveRule : MultiTenantEntity
     {
         [Required]
         [StringLength(200)]
@@ -33,6 +34,8 @@ namespace Incentive.Core.Entities
 
         [Required]
         public IncentiveCalculationType Incentive { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? Salary { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? TargetValue { get; set; }
@@ -59,9 +62,6 @@ namespace Incentive.Core.Entities
         // Maximum incentive caps
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? MaximumIncentiveAmount { get; set; }
-
-        // User or Team that this rule applies to
-        public string? UserId { get; set; }
 
         public Guid? TeamId { get; set; }
 

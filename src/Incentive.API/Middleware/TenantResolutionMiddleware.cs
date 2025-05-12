@@ -14,7 +14,7 @@ namespace Incentive.API.Middleware
         public TenantResolutionMiddleware(
             RequestDelegate next,
             ILogger<TenantResolutionMiddleware> logger,
-            string tenantHeaderName = "X-Tenant-ID")
+            string tenantHeaderName = "tanantId")
         {
             _next = next;
             _logger = logger;

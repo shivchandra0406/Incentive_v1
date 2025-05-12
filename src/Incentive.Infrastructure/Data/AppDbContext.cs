@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Incentive.Core.Common;
 using Incentive.Core.Entities;
 using Incentive.Infrastructure.Identity;
@@ -9,6 +5,9 @@ using Incentive.Infrastructure.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Incentive.Infrastructure.Data
 {
@@ -37,10 +36,10 @@ namespace Incentive.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
-            // Set default schema for Identity tables
+            // Set default schema for all tables
             builder.HasDefaultSchema("dbo");
 
-            // Configure schemas for different entity types
+            // Configure schemas for Identity tables (these don't use our SchemaAttribute)
             builder.Entity<AppUser>().ToTable("Users", "Identity");
             builder.Entity<AppRole>().ToTable("Roles", "Identity");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles", "Identity");
@@ -49,80 +48,164 @@ namespace Incentive.Infrastructure.Data
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims", "Identity");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", "Identity");
 
-            // Configure schemas for business entities
-            builder.Entity<Tenant>().ToTable("Tenants", "Tenant");
-
-            // IncentiveManagement schema
-            builder.Entity<IncentiveRule>().ToTable("IncentiveRules", "IncentiveManagement");
-            builder.Entity<IncentiveEarning>().ToTable("IncentiveEarnings", "IncentiveManagement");
-            builder.Entity<Deal>().ToTable("Deals", "IncentiveManagement");
-            builder.Entity<Payment>().ToTable("Payments", "IncentiveManagement");
-            builder.Entity<DealActivity>().ToTable("DealActivities", "IncentiveManagement");
-
-            // Apply entity configurations
+            // Apply entity configurations first
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            // Add global query filters for soft-deletable entities
+            // Apply schema attributes after configurations
+            ApplySchemaAttributes(builder);
+
+            // Add global query filters for soft-deletable entities and multi-tenancy
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                Expression finalExpression = null;
+
+                // Multi-tenancy
+                if (typeof(MultiTenantEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    var tenantIdProperty = Expression.Property(parameter, "TenantId");
+                    var getCurrentTenantIdMethod = typeof(AppDbContext).GetMethod(nameof(GetCurrentTenantId));
+                    var getCurrentTenantIdCall = Expression.Call(Expression.Constant(this), getCurrentTenantIdMethod);
+                    var tenantIdComparison = Expression.Equal(tenantIdProperty, getCurrentTenantIdCall);
+                    finalExpression = tenantIdComparison;
+                }
+
+                // Soft delete
                 if (typeof(SoftDeletableEntity).IsAssignableFrom(entityType.ClrType))
                 {
-                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                    var isDeletedProperty = System.Linq.Expressions.Expression.Property(parameter, "IsDeleted");
-                    var falseConstant = System.Linq.Expressions.Expression.Constant(false);
-                    var notDeletedComparison = System.Linq.Expressions.Expression.Equal(isDeletedProperty, falseConstant);
-                    var lambda = System.Linq.Expressions.Expression.Lambda(notDeletedComparison, parameter);
+                    var isDeletedProperty = Expression.Property(parameter, "IsDeleted");
+                    var notDeleted = Expression.Equal(isDeletedProperty, Expression.Constant(false));
+                    finalExpression = finalExpression != null
+                        ? Expression.AndAlso(finalExpression, notDeleted)
+                        : notDeleted;
+                }
 
+                // Apply combined filter if any
+                if (finalExpression != null)
+                {
+                    var lambda = Expression.Lambda(finalExpression, parameter);
                     builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Gets the current tenant ID from the tenant provider.
+        /// </summary>
+        /// <returns>The current tenant ID.</returns>
+        public string GetCurrentTenantId()
+        {
+            return _tenantProvider.GetTenantId();
+        }
+
+        /// <summary>
+        /// Applies schema attributes to entity types.
+        /// </summary>
+        /// <param name="modelBuilder">The model builder.</param>
+        private void ApplySchemaAttributes(ModelBuilder modelBuilder)
+        {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Skip non-CLR types (like query types)
+                if (entityType.ClrType == null)
+                    continue;
+
+                // Get the schema attribute if it exists
+                var schemaAttribute = entityType.ClrType.GetCustomAttribute<SchemaAttribute>();
+                if (schemaAttribute != null)
+                {
+                    // Get the current table name (which might have been set by a configuration)
+                    var tableName = entityType.GetTableName();
+
+                    // Apply the schema from the attribute
+                    modelBuilder.Entity(entityType.ClrType)
+                        .ToTable(tableName, schemaAttribute.Name);
+
+                    Console.WriteLine($"Applied schema '{schemaAttribute.Name}' to entity {entityType.ClrType.Name}");
                 }
             }
         }
 
+        #region Save changes
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            // Get current tenant ID
-            var tenantId = _tenantProvider.GetTenantId();
+            var tenantId = GetCurrentTenantId();
             var userId = _currentUserService.GetUserId();
             var now = DateTime.UtcNow;
+            _ = Guid.TryParse(userId, out Guid GuidUserId);
 
-            // Apply audit information
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            foreach (var entry in ChangeTracker.Entries())
             {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.CreatedAt = now;
-                        entry.Entity.CreatedBy = userId;
-                        break;
-                    case EntityState.Modified:
-                        entry.Entity.LastModifiedAt = now;
-                        entry.Entity.LastModifiedBy = userId;
-                        break;
-                }
-            }
-
-            // Apply soft delete
-            foreach (var entry in ChangeTracker.Entries<SoftDeletableEntity>())
-            {
-                if (entry.State == EntityState.Deleted)
-                {
-                    entry.State = EntityState.Modified;
-                    entry.Entity.IsDeleted = true;
-                    entry.Entity.DeletedAt = now;
-                    entry.Entity.DeletedBy = userId;
-                }
-            }
-
-            // Apply multi-tenancy
-            foreach (var entry in ChangeTracker.Entries<MultiTenantEntity>())
-            {
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Entity.TenantId = tenantId;
-                }
+                ApplyAuditInfo(entry, now, GuidUserId);
+                ApplySoftDelete(entry, now, GuidUserId);
+                ApplyMultiTenancy(entry, tenantId);
             }
 
             return await base.SaveChangesAsync(cancellationToken);
         }
+        private void ApplyAuditInfo(EntityEntry entry, DateTime now, Guid userId)
+        {
+            var entity = entry.Entity;
+
+            if (entity is UserAuditableEntity userAuditable)
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        userAuditable.CreatedAt = now;
+                        userAuditable.CreatedBy = userId;
+                        userAuditable.LastModifiedAt = now;
+                        userAuditable.LastModifiedBy = userId;
+                        break;
+                    case EntityState.Modified:
+                        userAuditable.LastModifiedAt = now;
+                        userAuditable.LastModifiedBy = userId;
+                        break;
+                }
+            }
+            else if (entity is AuditableEntity auditable)
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        auditable.CreatedAt = now;
+                        auditable.LastModifiedAt = now;
+                        break;
+                    case EntityState.Modified:
+                        auditable.LastModifiedAt = now;
+                        break;
+                }
+            }
+        }
+        private void ApplySoftDelete(EntityEntry entry, DateTime now, Guid userId)
+        {
+            var entity = entry.Entity;
+
+            if (entry.State != EntityState.Deleted)
+                return;
+
+            if (entity is UserSoftDeletableEntity userDeletable)
+            {
+                entry.State = EntityState.Modified;
+                userDeletable.IsDeleted = true;
+                userDeletable.DeletedAt = now;
+                userDeletable.DeletedBy = userId;
+            }
+            else if (entity is SoftDeletableEntity deletable)
+            {
+                entry.State = EntityState.Modified;
+                deletable.IsDeleted = true;
+                deletable.DeletedAt = now;
+            }
+        }
+        private void ApplyMultiTenancy(EntityEntry entry, string tenantId)
+        {
+            if (entry.State == EntityState.Added && entry.Entity is MultiTenantEntity tenantEntity)
+            {
+                tenantEntity.TenantId = tenantId;
+            }
+        }
+        #endregion
     }
 }

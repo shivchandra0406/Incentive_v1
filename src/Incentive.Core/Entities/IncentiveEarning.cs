@@ -6,7 +6,8 @@ using Incentive.Core.Enums;
 
 namespace Incentive.Core.Entities
 {
-    public class IncentiveEarning : SoftDeletableEntity
+    [Schema("IncentiveManagement")]
+    public class IncentiveEarning : MultiTenantEntity
     {
         [Required]
         public Guid IncentiveRuleId { get; set; }

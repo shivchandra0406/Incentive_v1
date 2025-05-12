@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Incentive.API.Attributes;
 using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,7 @@ namespace Incentive.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AllowAnonymous]
+    [RequiresTenantId(isRequired: false, description: "Not required for tenant management endpoints")]
     public class TenantsController : ControllerBase
     {
         private readonly ITenantService _tenantService;
@@ -49,7 +51,7 @@ namespace Incentive.API.Controllers
                 return BadRequest($"Tenant with identifier '{tenant.Identifier}' already exists");
             }
 
-            var newTenant = await _tenantService.CreateTenantAsync(tenant.Name, tenant.Identifier, tenant.ConnectionString);
+            var newTenant = await _tenantService.CreateTenantAsync(tenant.Id, tenant.Name, tenant.Identifier, tenant.ConnectionString);
             return CreatedAtAction(nameof(GetTenant), new { id = newTenant.Id }, newTenant);
         }
 

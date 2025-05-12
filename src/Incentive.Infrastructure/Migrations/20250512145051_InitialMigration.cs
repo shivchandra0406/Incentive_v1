@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Incentive.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPostgresSchema : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,29 +22,43 @@ namespace Incentive.Infrastructure.Migrations
                 name: "Tenant");
 
             migrationBuilder.CreateTable(
-                name: "Projects",
+                name: "IncentiveRules",
                 schema: "IncentiveManagement",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Frequency = table.Column<string>(type: "text", nullable: false),
+                    AppliedTo = table.Column<string>(type: "text", nullable: false),
+                    Currency = table.Column<string>(type: "text", nullable: false),
+                    Target = table.Column<string>(type: "text", nullable: false),
+                    Incentive = table.Column<string>(type: "text", nullable: false),
+                    Salary = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    TargetValue = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    TargetDealCount = table.Column<int>(type: "integer", nullable: true),
+                    Commission = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    TotalValue = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    IsIncludeSalary = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    MinimumSalesThreshold = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    MinimumDealCountThreshold = table.Column<int>(type: "integer", nullable: true),
+                    MaximumIncentiveAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<string>(type: "text", nullable: false)
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Projects", x => x.Id);
+                    table.PrimaryKey("PK_IncentiveRules", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -69,45 +83,16 @@ namespace Incentive.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Salespeople",
-                schema: "IncentiveManagement",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FirstName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    EmployeeId = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    HireDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Salespeople", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Tenants",
                 schema: "Tenant",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Identifier = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ConnectionString = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    ConnectionString = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -151,44 +136,56 @@ namespace Incentive.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IncentiveRules",
+                name: "Deals",
                 schema: "IncentiveManagement",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    ProjectId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Value = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    MinBookingValue = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    MaxBookingValue = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    Frequency = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Monthly"),
-                    AppliedTo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "User"),
-                    CurrencyType = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false, defaultValue: "USD"),
-                    TargetType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "ItemBased"),
-                    IncentiveType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Percentage"),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    DealName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CustomerName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CustomerEmail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CustomerPhone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    CustomerAddress = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    PaidAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false, defaultValue: 0m),
+                    RemainingAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    CurrencyType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    TaxPercentage = table.Column<decimal>(type: "numeric(5,2)", nullable: false, defaultValue: 0m),
+                    TaxAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false, defaultValue: 0m),
+                    DiscountAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false, defaultValue: 0m),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    DealDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ClosedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    PaymentDueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ClosedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
                     TeamId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ReferralName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    ReferralEmail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    ReferralPhone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    ReferralCommission = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    IsReferralCommissionPaid = table.Column<bool>(type: "boolean", nullable: false),
+                    Source = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    IncentiveRuleId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Notes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    RecurringFrequencyMonths = table.Column<int>(type: "integer", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<string>(type: "text", nullable: false)
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IncentiveRules", x => x.Id);
+                    table.PrimaryKey("PK_Deals", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IncentiveRules_Projects_ProjectId",
-                        column: x => x.ProjectId,
+                        name: "FK_Deals_IncentiveRules_IncentiveRuleId",
+                        column: x => x.IncentiveRuleId,
                         principalSchema: "IncentiveManagement",
-                        principalTable: "Projects",
+                        principalTable: "IncentiveRules",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -214,48 +211,6 @@ namespace Incentive.Infrastructure.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Bookings",
-                schema: "IncentiveManagement",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProjectId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SalespersonId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CustomerName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CustomerEmail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CustomerPhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    BookingDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    BookingValue = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bookings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Bookings_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalSchema: "IncentiveManagement",
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Bookings_Salespeople_SalespersonId",
-                        column: x => x.SalespersonId,
-                        principalSchema: "IncentiveManagement",
-                        principalTable: "Salespeople",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -353,34 +308,70 @@ namespace Incentive.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DealActivities",
+                schema: "IncentiveManagement",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DealId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ActivityDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DealActivities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DealActivities_Deals_DealId",
+                        column: x => x.DealId,
+                        principalSchema: "IncentiveManagement",
+                        principalTable: "Deals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "IncentiveEarnings",
                 schema: "IncentiveManagement",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    BookingId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SalespersonId = table.Column<Guid>(type: "uuid", nullable: false),
                     IncentiveRuleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    DealId = table.Column<Guid>(type: "uuid", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     EarningDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
+                    IsPaid = table.Column<bool>(type: "boolean", nullable: false),
                     PaidDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<string>(type: "text", nullable: false)
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_IncentiveEarnings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IncentiveEarnings_Bookings_BookingId",
-                        column: x => x.BookingId,
+                        name: "FK_IncentiveEarnings_Deals_DealId",
+                        column: x => x.DealId,
                         principalSchema: "IncentiveManagement",
-                        principalTable: "Bookings",
+                        principalTable: "Deals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -390,33 +381,61 @@ namespace Incentive.Infrastructure.Migrations
                         principalTable: "IncentiveRules",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                schema: "IncentiveManagement",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DealId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    TransactionReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ReceivedByUserId = table.Column<string>(type: "text", nullable: true),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IncentiveEarnings_Salespeople_SalespersonId",
-                        column: x => x.SalespersonId,
+                        name: "FK_Payments_Deals_DealId",
+                        column: x => x.DealId,
                         principalSchema: "IncentiveManagement",
-                        principalTable: "Salespeople",
+                        principalTable: "Deals",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_ProjectId",
+                name: "IX_DealActivities_DealId",
                 schema: "IncentiveManagement",
-                table: "Bookings",
-                column: "ProjectId");
+                table: "DealActivities",
+                column: "DealId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_SalespersonId",
+                name: "IX_Deals_IncentiveRuleId",
                 schema: "IncentiveManagement",
-                table: "Bookings",
-                column: "SalespersonId");
+                table: "Deals",
+                column: "IncentiveRuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IncentiveEarnings_BookingId",
+                name: "IX_IncentiveEarnings_DealId",
                 schema: "IncentiveManagement",
                 table: "IncentiveEarnings",
-                column: "BookingId",
-                unique: true);
+                column: "DealId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IncentiveEarnings_IncentiveRuleId",
@@ -425,16 +444,10 @@ namespace Incentive.Infrastructure.Migrations
                 column: "IncentiveRuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IncentiveEarnings_SalespersonId",
+                name: "IX_Payments_DealId",
                 schema: "IncentiveManagement",
-                table: "IncentiveEarnings",
-                column: "SalespersonId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IncentiveRules_ProjectId",
-                schema: "IncentiveManagement",
-                table: "IncentiveRules",
-                column: "ProjectId");
+                table: "Payments",
+                column: "DealId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
@@ -492,7 +505,15 @@ namespace Incentive.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DealActivities",
+                schema: "IncentiveManagement");
+
+            migrationBuilder.DropTable(
                 name: "IncentiveEarnings",
+                schema: "IncentiveManagement");
+
+            migrationBuilder.DropTable(
+                name: "Payments",
                 schema: "IncentiveManagement");
 
             migrationBuilder.DropTable(
@@ -520,11 +541,7 @@ namespace Incentive.Infrastructure.Migrations
                 schema: "Identity");
 
             migrationBuilder.DropTable(
-                name: "Bookings",
-                schema: "IncentiveManagement");
-
-            migrationBuilder.DropTable(
-                name: "IncentiveRules",
+                name: "Deals",
                 schema: "IncentiveManagement");
 
             migrationBuilder.DropTable(
@@ -536,11 +553,7 @@ namespace Incentive.Infrastructure.Migrations
                 schema: "Identity");
 
             migrationBuilder.DropTable(
-                name: "Salespeople",
-                schema: "IncentiveManagement");
-
-            migrationBuilder.DropTable(
-                name: "Projects",
+                name: "IncentiveRules",
                 schema: "IncentiveManagement");
         }
     }

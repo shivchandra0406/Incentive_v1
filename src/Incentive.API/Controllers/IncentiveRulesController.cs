@@ -64,7 +64,7 @@ namespace Incentive.API.Controllers
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IncentiveRuleDto>>> GetIncentiveRulesByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<IncentiveRuleDto>>> GetIncentiveRulesByUserId(Guid userId)
         {
             var incentiveRules = await _incentiveRuleRepository.GetRulesByUserIdAsync(userId);
             return Ok(_mapper.Map<IEnumerable<IncentiveRuleDto>>(incentiveRules));
@@ -101,9 +101,6 @@ namespace Incentive.API.Controllers
         {
             var incentiveRule = _mapper.Map<IncentiveRule>(createIncentiveRuleDto);
             
-            // Set the current user as the creator
-            incentiveRule.CreatedBy = User.Identity?.Name;
-            
             var createdIncentiveRule = await _incentiveRuleRepository.AddAsync(incentiveRule);
             
             return CreatedAtAction(nameof(GetIncentiveRuleById), new { id = createdIncentiveRule.Id }, _mapper.Map<IncentiveRuleDto>(createdIncentiveRule));
@@ -122,10 +119,6 @@ namespace Incentive.API.Controllers
             }
 
             _mapper.Map(updateIncentiveRuleDto, incentiveRule);
-            
-            // Set the current user as the modifier
-            incentiveRule.LastModifiedBy = User.Identity?.Name;
-            incentiveRule.LastModifiedAt = DateTime.UtcNow;
             
             await _incentiveRuleRepository.UpdateAsync(incentiveRule);
             

@@ -10,7 +10,7 @@ namespace Incentive.Core.Interfaces
     public interface IIncentiveRuleRepository : IRepository<IncentiveRule>
     {
         Task<IReadOnlyList<IncentiveRule>> GetActiveRulesAsync(CancellationToken cancellationToken = default);
-        Task<IReadOnlyList<IncentiveRule>> GetRulesByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<IncentiveRule>> GetRulesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<IncentiveRule>> GetRulesByTeamIdAsync(Guid teamId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<IncentiveRule>> GetRulesByFrequencyAsync(TargetFrequency frequency, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<IncentiveRule>> GetRulesByAppliedTypeAsync(AppliedRuleType appliedType, CancellationToken cancellationToken = default);

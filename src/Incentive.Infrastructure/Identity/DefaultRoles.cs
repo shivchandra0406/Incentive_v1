@@ -12,13 +12,14 @@ namespace Incentive.Infrastructure.Identity
         public const string Manager = "Manager";
         public const string User = "User";
         public const string ReadOnly = "ReadOnly";
+        public const string Employee = "Employee";
 
         /// <summary>
         /// Gets all default roles
         /// </summary>
         public static List<string> GetAllRoles()
         {
-            return new List<string> { Admin, Manager, User, ReadOnly };
+            return new List<string> { Admin, Manager, User, ReadOnly, Employee };
         }
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace Incentive.Infrastructure.Identity
                 Manager => GetManagerPermissions(),
                 User => GetUserPermissions(),
                 ReadOnly => GetReadOnlyPermissions(),
+                Employee => GetEmployeePermissions(),
                 _ => new List<string>()
             };
         }
@@ -144,6 +146,18 @@ namespace Incentive.Infrastructure.Identity
                 Permissions.ViewUsers,
                 Permissions.ViewRoles,
                 Permissions.ViewTenants,
+                Permissions.ViewIncentiveRules,
+                Permissions.ViewDeals,
+                Permissions.ViewPayments,
+                Permissions.ViewDealActivities,
+                Permissions.ViewIncentiveEarnings
+            };
+        }
+
+        private static List<string> GetEmployeePermissions()
+        {
+            return new List<string>
+            {
                 Permissions.ViewIncentiveRules,
                 Permissions.ViewDeals,
                 Permissions.ViewPayments,

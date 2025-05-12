@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Incentive.API.Extensions;
 using Incentive.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -41,6 +42,9 @@ namespace Incentive.API.Extensions
                     }
                 });
             });
+
+            // Add tenant middleware
+            app.UseTenantMiddleware("tenantId");
 
             // Seed identity data (roles, claims, admin user)
             app.SeedIdentityDataAsync("default").GetAwaiter().GetResult();

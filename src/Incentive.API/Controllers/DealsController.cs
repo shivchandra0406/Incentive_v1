@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Incentive.API.Attributes;
 using Incentive.Application.DTOs;
 using Incentive.Core.Entities;
 using Incentive.Core.Enums;
@@ -16,6 +17,7 @@ namespace Incentive.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [RequiresTenantId(description: "The tenant ID to access deals data")]
     public class DealsController : ControllerBase
     {
         private readonly IDealRepository _dealRepository;
@@ -67,7 +69,7 @@ namespace Incentive.API.Controllers
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<DealDto>>> GetDealsByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<DealDto>>> GetDealsByUserId(Guid userId)
         {
             var deals = await _dealRepository.GetDealsByUserIdAsync(userId);
             return Ok(_mapper.Map<IEnumerable<DealDto>>(deals));
@@ -149,31 +151,25 @@ namespace Incentive.API.Controllers
         public async Task<ActionResult<DealDto>> CreateDeal(CreateDealDto createDealDto)
         {
             var deal = _mapper.Map<Deal>(createDealDto);
-            
-            // Set the current user as the creator
-            deal.CreatedBy = User.Identity?.Name;
-            deal.UserId = User.Identity?.Name;
-            
             // Calculate tax amount
             deal.TaxAmount = deal.TotalAmount * (deal.TaxPercentage / 100);
-            
+
             // Calculate remaining amount
             deal.RemainingAmount = deal.TotalAmount - deal.PaidAmount;
-            
+
             var createdDeal = await _dealRepository.AddAsync(deal);
-            
+
             // Create an activity record for the deal creation
             var activity = new DealActivity
             {
                 DealId = createdDeal.Id,
                 Type = ActivityType.Created,
                 Description = "Deal created",
-                UserId = User.Identity?.Name,
                 ActivityDate = DateTime.UtcNow
             };
-            
+
             await _dealActivityRepository.AddAsync(activity);
-            
+
             return CreatedAtAction(nameof(GetDealById), new { id = createdDeal.Id }, _mapper.Map<DealDto>(createdDeal));
         }
 
@@ -191,31 +187,25 @@ namespace Incentive.API.Controllers
 
             // Store the old status to check if it changed
             var oldStatus = deal.Status;
-            
+
             _mapper.Map(updateDealDto, deal);
-            
-            // Set the current user as the modifier
-            deal.LastModifiedBy = User.Identity?.Name;
-            deal.LastModifiedAt = DateTime.UtcNow;
-            
             // Calculate tax amount
             deal.TaxAmount = deal.TotalAmount * (deal.TaxPercentage / 100);
-            
+
             // Calculate remaining amount
             deal.RemainingAmount = deal.TotalAmount - deal.PaidAmount;
-            
+
             await _dealRepository.UpdateAsync(deal);
-            
+
             // Create an activity record for the deal update
             var activity = new DealActivity
             {
                 DealId = deal.Id,
                 Type = ActivityType.Updated,
                 Description = "Deal updated",
-                UserId = User.Identity?.Name,
                 ActivityDate = DateTime.UtcNow
             };
-            
+
             // If status changed, add a status change activity
             if (oldStatus != deal.Status)
             {
@@ -224,15 +214,14 @@ namespace Incentive.API.Controllers
                     DealId = deal.Id,
                     Type = ActivityType.StatusChanged,
                     Description = $"Status changed from {oldStatus} to {deal.Status}",
-                    UserId = User.Identity?.Name,
                     ActivityDate = DateTime.UtcNow
                 };
-                
+
                 await _dealActivityRepository.AddAsync(statusActivity);
             }
-            
+
             await _dealActivityRepository.AddAsync(activity);
-            
+
             return NoContent();
         }
 
@@ -248,19 +237,18 @@ namespace Incentive.API.Controllers
             }
 
             await _dealRepository.SoftDeleteAsync(deal);
-            
+
             // Create an activity record for the deal deletion
             var activity = new DealActivity
             {
                 DealId = deal.Id,
                 Type = ActivityType.Cancelled,
                 Description = "Deal deleted",
-                UserId = User.Identity?.Name,
                 ActivityDate = DateTime.UtcNow
             };
-            
+
             await _dealActivityRepository.AddAsync(activity);
-            
+
             return NoContent();
         }
     }

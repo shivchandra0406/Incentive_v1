@@ -3,6 +3,7 @@ using Incentive.Core.Common;
 
 namespace Incentive.Core.Entities
 {
+    [Schema("Tenant")]
     public class Tenant
     {
         public string Id { get; set; }

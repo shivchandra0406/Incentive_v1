@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Incentive.API.Attributes;
 using Incentive.Application.DTOs;
 using Incentive.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ namespace Incentive.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [RequiresTenantId(isRequired: false, description: "Not required for authentication endpoints")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -38,7 +40,8 @@ namespace Incentive.API.Controllers
                 Succeeded = true,
                 Token = result.Token,
                 RefreshToken = result.RefreshToken,
-                Expiration = result.Expiration
+                Expiration = result.Expiration,
+                UserId = 
             });
         }
 

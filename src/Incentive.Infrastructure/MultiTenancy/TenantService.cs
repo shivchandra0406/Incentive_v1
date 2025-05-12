@@ -52,13 +52,13 @@ namespace Incentive.Infrastructure.MultiTenancy
             }
         }
 
-        public async Task<Tenant> CreateTenantAsync(string name, string identifier, string connectionString)
+        public async Task<Tenant> CreateTenantAsync(string id, string name, string identifier, string connectionString)
         {
             try
             {
                 var tenant = new Tenant
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = id,
                     Name = name,
                     Identifier = identifier,
                     ConnectionString = connectionString,

@@ -199,7 +199,7 @@ namespace Incentive.Infrastructure.Identity
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             {
-                return (false, string.Empty, string.Empty, DateTime.MinValue);
+                return (false, string.Empty, string.Empty,DateTime.MinValue);
             }
 
             var token = await GenerateJwtToken(user);

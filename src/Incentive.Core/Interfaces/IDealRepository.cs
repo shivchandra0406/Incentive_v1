@@ -10,7 +10,7 @@ namespace Incentive.Core.Interfaces
     public interface IDealRepository : IRepository<Deal>
     {
         Task<IReadOnlyList<Deal>> GetDealsByStatusAsync(DealStatus status, CancellationToken cancellationToken = default);
-        Task<IReadOnlyList<Deal>> GetDealsByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Deal>> GetDealsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByIncentiveRuleIdAsync(Guid incentiveRuleId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByCustomerNameAsync(string customerName, CancellationToken cancellationToken = default);

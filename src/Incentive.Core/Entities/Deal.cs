@@ -10,7 +10,8 @@ namespace Incentive.Core.Entities
     /// <summary>
     /// Represents a deal or sale in the system, with customer details, financials and assignment information
     /// </summary>
-    public class Deal : SoftDeletableEntity
+    [Schema("IncentiveManagement")]
+    public class Deal : MultiTenantEntity
     {
         [Required]
         [StringLength(200)]
@@ -40,7 +41,7 @@ namespace Incentive.Core.Entities
         public decimal PaidAmount { get; set; } = 0;
 
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal RemainingAmount { get; set; } // This can be computed, but stored for query efficiency
+        public decimal RemainingAmount { get; set; } 
 
         [Required]
         [StringLength(50)]
@@ -67,7 +68,7 @@ namespace Incentive.Core.Entities
         public DateTime? PaymentDueDate { get; set; } // When payment is due
 
         // Who closed the deal
-        public string? ClosedByUserId { get; set; }
+        public Guid? ClosedByUserId { get; set; }
 
         // Team attribution
         public Guid? TeamId { get; set; }
@@ -103,9 +104,6 @@ namespace Incentive.Core.Entities
         public string? Notes { get; set; }
 
         public int? RecurringFrequencyMonths { get; set; }
-
-        // User relationship (who created/owns the deal)
-        public string? UserId { get; set; }
 
         // Payment tracking
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

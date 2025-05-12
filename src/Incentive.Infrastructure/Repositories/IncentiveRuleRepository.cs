@@ -25,7 +25,7 @@ namespace Incentive.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<IncentiveRule>> GetRulesByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<IncentiveRule>> GetRulesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.IncentiveRules
                 .Where(r => r.UserId == userId)
@@ -55,10 +55,8 @@ namespace Incentive.Infrastructure.Repositories
 
         public async Task SoftDeleteAsync(IncentiveRule entity, CancellationToken cancellationToken = default)
         {
-            entity.IsDeleted = true;
-            entity.DeletedAt = DateTime.UtcNow;
-
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            // Use the DbContext to delete the entity (soft delete is handled by the DbContext)
+            _dbContext.IncentiveRules.Remove(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }

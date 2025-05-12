@@ -1,11 +1,8 @@
-using System;
-using System.IO;
-using System.Reflection;
+using Incentive.API.Swagger;
 using Incentive.Application.Mappings;
 using Incentive.Infrastructure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace Incentive.API.Extensions
 {
@@ -81,6 +78,9 @@ namespace Incentive.API.Extensions
                 {
                     c.IncludeXmlComments(xmlPath);
                 }
+
+                // Add tenant ID operation filter
+                c.OperationFilter<TenantIdOperationFilter>();
             });
 
             return services;

@@ -36,7 +36,7 @@ namespace Incentive.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<DealActivity>> GetActivitiesByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<DealActivity>> GetActivitiesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<DealActivity>()
                 .Where(a => a.UserId == userId)
@@ -56,10 +56,8 @@ namespace Incentive.Infrastructure.Repositories
 
         public async Task SoftDeleteAsync(DealActivity entity, CancellationToken cancellationToken = default)
         {
-            entity.IsDeleted = true;
-            entity.DeletedAt = DateTime.UtcNow;
-
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            // Use the DbContext to delete the entity (soft delete is handled by the DbContext)
+            _dbContext.DealActivities.Remove(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }

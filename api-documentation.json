@@ -1,0 +1,750 @@
+{
+  "apiDocumentation": {
+    "title": "Incentive Management System API",
+    "version": "1.0.0",
+    "description": "API documentation for the Incentive Management System",
+    "apiStandards": {
+      "headers": {
+        "Authorization": "Bearer {jwt_token}",
+        "X-Tenant-Id": "Tenant identifier (e.g., 'default')"
+      },
+      "responseFormat": {
+        "success": "Boolean indicating if the request was successful",
+        "data": "The response data (null for operations that don't return data)",
+        "message": "A human-readable message describing the result",
+        "errors": "Array of error messages (only present when success is false)"
+      },
+      "pagination": {
+        "pageNumber": "Current page number (1-based)",
+        "pageSize": "Number of items per page",
+        "totalCount": "Total number of items",
+        "totalPages": "Total number of pages",
+        "items": "Array of items for the current page"
+      },
+      "errorHandling": {
+        "400": "Bad Request - Invalid input data",
+        "401": "Unauthorized - Missing or invalid authentication",
+        "403": "Forbidden - User doesn't have required permissions",
+        "404": "Not Found - Resource doesn't exist",
+        "500": "Internal Server Error - Unexpected server error"
+      }
+    },
+    "authorizationSystem": {
+      "description": "The system uses a comprehensive role and claims-based authorization system",
+      "roles": [
+        {
+          "name": "Admin",
+          "description": "Administrator with full access to all system features",
+          "permissions": ["All permissions"]
+        },
+        {
+          "name": "Manager",
+          "description": "Manager with limited administrative access",
+          "permissions": [
+            "ViewUsers", "CreateUsers", "EditUsers",
+            "ViewRoles",
+            "ViewIncentiveRules", "CreateIncentiveRules", "EditIncentiveRules",
+            "ViewDeals", "CreateDeals", "EditDeals", "DeleteDeals",
+            "ViewPayments", "CreatePayments", "EditPayments"
+          ]
+        },
+        {
+          "name": "User",
+          "description": "Regular user with basic access",
+          "permissions": [
+            "ViewIncentiveRules",
+            "ViewDeals", "CreateDeals", "EditDeals",
+            "ViewPayments"
+          ]
+        },
+        {
+          "name": "ReadOnly",
+          "description": "Read-only access to the system",
+          "permissions": [
+            "ViewIncentiveRules",
+            "ViewDeals",
+            "ViewPayments"
+          ]
+        }
+      ],
+      "permissions": {
+        "Users": ["ViewUsers", "CreateUsers", "EditUsers", "DeleteUsers"],
+        "Roles": ["ViewRoles", "CreateRoles", "EditRoles", "DeleteRoles"],
+        "IncentiveRules": ["ViewIncentiveRules", "CreateIncentiveRules", "EditIncentiveRules", "DeleteIncentiveRules"],
+        "Deals": ["ViewDeals", "CreateDeals", "EditDeals", "DeleteDeals"],
+        "Payments": ["ViewPayments", "CreatePayments", "EditPayments", "DeletePayments"]
+      }
+    },
+    "modules": [
+      {
+        "name": "Authentication",
+        "description": "User authentication and authorization",
+        "endpoints": [
+          {
+            "name": "Login",
+            "method": "POST",
+            "path": "/api/auth/login",
+            "description": "Authenticate a user and get JWT token",
+            "requestPayload": {
+              "email": "admin@incentive.com",
+              "password": "Admin123!"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "refreshToken": "6ce8c9d1-9c3c-4d5a-b8e2-7e68c3f4a5b2",
+                "expiresIn": 3600,
+                "userId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                "email": "admin@incentive.com",
+                "roles": ["Admin"]
+              },
+              "message": "Login successful"
+            }
+          },
+          {
+            "name": "Register",
+            "method": "POST",
+            "path": "/api/auth/register",
+            "description": "Register a new user",
+            "requestPayload": {
+              "email": "user@example.com",
+              "password": "Password123!",
+              "confirmPassword": "Password123!",
+              "firstName": "John",
+              "lastName": "Doe"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "userId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "email": "user@example.com"
+              },
+              "message": "User registered successfully"
+            }
+          },
+          {
+            "name": "Refresh Token",
+            "method": "POST",
+            "path": "/api/auth/refresh-token",
+            "description": "Refresh JWT token using refresh token",
+            "requestPayload": {
+              "refreshToken": "6ce8c9d1-9c3c-4d5a-b8e2-7e68c3f4a5b2"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "refreshToken": "7d9e0f1g-2h3i-4j5k-6l7m-8n9o0p1q2r3",
+                "expiresIn": 3600
+              },
+              "message": "Token refreshed successfully"
+            }
+          }
+        ]
+      },
+      {
+        "name": "User Management",
+        "description": "Manage users and their roles",
+        "endpoints": [
+          {
+            "name": "Get Users",
+            "method": "GET",
+            "path": "/api/users",
+            "description": "Get a list of users with pagination",
+            "queryParams": {
+              "pageNumber": "Page number (default: 1)",
+              "pageSize": "Number of items per page (default: 10)"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "items": [
+                  {
+                    "id": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                    "email": "admin@incentive.com",
+                    "firstName": "Admin",
+                    "lastName": "User",
+                    "roles": ["Admin"],
+                    "isActive": true,
+                    "createdAt": "2023-05-10T12:00:00Z"
+                  }
+                ],
+                "totalCount": 1,
+                "pageNumber": 1,
+                "pageSize": 10,
+                "totalPages": 1
+              },
+              "message": "Users retrieved successfully"
+            }
+          },
+          {
+            "name": "Get User by ID",
+            "method": "GET",
+            "path": "/api/users/{id}",
+            "description": "Get a specific user by ID",
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "email": "user@example.com",
+                "firstName": "John",
+                "lastName": "Doe",
+                "roles": ["User"],
+                "claims": [
+                  {
+                    "type": "Permission",
+                    "value": "ViewDeals"
+                  },
+                  {
+                    "type": "Permission",
+                    "value": "CreateDeals"
+                  }
+                ],
+                "isActive": true,
+                "createdAt": "2023-05-11T14:30:00Z",
+                "updatedAt": "2023-05-11T14:30:00Z"
+              },
+              "message": "User retrieved successfully"
+            }
+          },
+          {
+            "name": "Create User",
+            "method": "POST",
+            "path": "/api/users",
+            "description": "Create a new user",
+            "requestPayload": {
+              "email": "newuser@example.com",
+              "password": "Password123!",
+              "confirmPassword": "Password123!",
+              "firstName": "Jane",
+              "lastName": "Smith",
+              "roles": ["Manager"]
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+                "email": "newuser@example.com"
+              },
+              "message": "User created successfully"
+            }
+          },
+          {
+            "name": "Update User",
+            "method": "PUT",
+            "path": "/api/users/{id}",
+            "description": "Update an existing user",
+            "requestPayload": {
+              "firstName": "Jane",
+              "lastName": "Smith-Johnson",
+              "isActive": true
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "User updated successfully"
+            }
+          },
+          {
+            "name": "Assign Role to User",
+            "method": "POST",
+            "path": "/api/users/{id}/roles",
+            "description": "Assign a role to a user",
+            "requestPayload": {
+              "role": "Manager"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Role assigned successfully"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Role Management",
+        "description": "Manage roles and permissions",
+        "endpoints": [
+          {
+            "name": "Get Roles",
+            "method": "GET",
+            "path": "/api/roles",
+            "description": "Get a list of all roles",
+            "responsePayload": {
+              "success": true,
+              "data": [
+                {
+                  "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                  "name": "Admin",
+                  "description": "Administrator with full access",
+                  "normalizedName": "ADMIN",
+                  "claimCount": 24
+                },
+                {
+                  "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+                  "name": "Manager",
+                  "description": "Manager with limited administrative access",
+                  "normalizedName": "MANAGER",
+                  "claimCount": 16
+                }
+              ],
+              "message": "Roles retrieved successfully"
+            }
+          },
+          {
+            "name": "Get Role by ID",
+            "method": "GET",
+            "path": "/api/roles/{id}",
+            "description": "Get a specific role by ID",
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "name": "Admin",
+                "description": "Administrator with full access",
+                "normalizedName": "ADMIN",
+                "claims": [
+                  {
+                    "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+                    "type": "Permission",
+                    "value": "ViewUsers"
+                  },
+                  {
+                    "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+                    "type": "Permission",
+                    "value": "CreateUsers"
+                  }
+                ]
+              },
+              "message": "Role retrieved successfully"
+            }
+          },
+          {
+            "name": "Create Role",
+            "method": "POST",
+            "path": "/api/roles",
+            "description": "Create a new role",
+            "requestPayload": {
+              "name": "SalesManager",
+              "description": "Manager for sales team"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+                "name": "SalesManager"
+              },
+              "message": "Role created successfully"
+            }
+          },
+          {
+            "name": "Add Claim to Role",
+            "method": "POST",
+            "path": "/api/role-claims",
+            "description": "Add a permission claim to a role",
+            "requestPayload": {
+              "roleId": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+              "claimType": "Permission",
+              "claimValue": "ViewDeals"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Claim added to role successfully"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Incentive Rules",
+        "description": "Manage incentive rules for calculating bonuses and commissions",
+        "endpoints": [
+          {
+            "name": "Get Incentive Rules",
+            "method": "GET",
+            "path": "/api/incentive-rules",
+            "description": "Get a list of incentive rules with pagination",
+            "queryParams": {
+              "pageNumber": "Page number (default: 1)",
+              "pageSize": "Number of items per page (default: 10)"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "items": [
+                  {
+                    "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                    "name": "Q2 Sales Bonus",
+                    "description": "Bonus for Q2 sales targets",
+                    "isActive": true,
+                    "startDate": "2023-04-01T00:00:00Z",
+                    "endDate": "2023-06-30T23:59:59Z",
+                    "calculationType": "Percentage",
+                    "calculationValue": 5.0,
+                    "targetType": "Revenue",
+                    "targetValue": 100000.0,
+                    "targetFrequency": "Quarterly",
+                    "currencyCode": "USD",
+                    "appliedRuleType": "Individual",
+                    "createdAt": "2023-03-15T10:00:00Z",
+                    "createdBy": "Admin User"
+                  }
+                ],
+                "totalCount": 1,
+                "pageNumber": 1,
+                "pageSize": 10,
+                "totalPages": 1
+              },
+              "message": "Incentive rules retrieved successfully"
+            }
+          },
+          {
+            "name": "Get Incentive Rule by ID",
+            "method": "GET",
+            "path": "/api/incentive-rules/{id}",
+            "description": "Get a specific incentive rule by ID",
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "name": "Q2 Sales Bonus",
+                "description": "Bonus for Q2 sales targets",
+                "isActive": true,
+                "startDate": "2023-04-01T00:00:00Z",
+                "endDate": "2023-06-30T23:59:59Z",
+                "calculationType": "Percentage",
+                "calculationValue": 5.0,
+                "targetType": "Revenue",
+                "targetValue": 100000.0,
+                "targetFrequency": "Quarterly",
+                "currencyCode": "USD",
+                "appliedRuleType": "Individual",
+                "createdAt": "2023-03-15T10:00:00Z",
+                "createdBy": "Admin User",
+                "updatedAt": "2023-03-16T11:20:00Z",
+                "updatedBy": "Admin User"
+              },
+              "message": "Incentive rule retrieved successfully"
+            }
+          },
+          {
+            "name": "Create Incentive Rule",
+            "method": "POST",
+            "path": "/api/incentive-rules",
+            "description": "Create a new incentive rule",
+            "requestPayload": {
+              "name": "Year-End Bonus",
+              "description": "Bonus for meeting annual targets",
+              "isActive": true,
+              "startDate": "2023-01-01T00:00:00Z",
+              "endDate": "2023-12-31T23:59:59Z",
+              "calculationType": "Percentage",
+              "calculationValue": 10.0,
+              "targetType": "Revenue",
+              "targetValue": 500000.0,
+              "targetFrequency": "Yearly",
+              "currencyCode": "USD",
+              "appliedRuleType": "Team"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+                "name": "Year-End Bonus"
+              },
+              "message": "Incentive rule created successfully"
+            }
+          },
+          {
+            "name": "Update Incentive Rule",
+            "method": "PUT",
+            "path": "/api/incentive-rules/{id}",
+            "description": "Update an existing incentive rule",
+            "requestPayload": {
+              "name": "Year-End Bonus 2023",
+              "description": "Updated bonus for meeting annual targets",
+              "isActive": true,
+              "calculationValue": 12.0
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Incentive rule updated successfully"
+            }
+          },
+          {
+            "name": "Delete Incentive Rule",
+            "method": "DELETE",
+            "path": "/api/incentive-rules/{id}",
+            "description": "Delete an incentive rule",
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Incentive rule deleted successfully"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Deals",
+        "description": "Manage deals that can earn incentives",
+        "endpoints": [
+          {
+            "name": "Get Deals",
+            "method": "GET",
+            "path": "/api/deals",
+            "description": "Get a list of deals with pagination",
+            "queryParams": {
+              "pageNumber": "Page number (default: 1)",
+              "pageSize": "Number of items per page (default: 10)",
+              "status": "Filter by deal status (optional)"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "items": [
+                  {
+                    "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                    "title": "Enterprise Software License",
+                    "description": "Annual enterprise license for 500 users",
+                    "clientName": "Acme Corporation",
+                    "value": 250000.0,
+                    "currencyCode": "USD",
+                    "status": "Closed",
+                    "closedDate": "2023-05-15T14:30:00Z",
+                    "salesRepId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                    "salesRepName": "John Doe",
+                    "createdAt": "2023-04-10T09:15:00Z"
+                  }
+                ],
+                "totalCount": 1,
+                "pageNumber": 1,
+                "pageSize": 10,
+                "totalPages": 1
+              },
+              "message": "Deals retrieved successfully"
+            }
+          },
+          {
+            "name": "Get Deal by ID",
+            "method": "GET",
+            "path": "/api/deals/{id}",
+            "description": "Get a specific deal by ID",
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "title": "Enterprise Software License",
+                "description": "Annual enterprise license for 500 users",
+                "clientName": "Acme Corporation",
+                "clientContact": "Jane Smith",
+                "clientEmail": "jane.smith@acme.com",
+                "value": 250000.0,
+                "currencyCode": "USD",
+                "status": "Closed",
+                "closedDate": "2023-05-15T14:30:00Z",
+                "salesRepId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                "salesRepName": "John Doe",
+                "activities": [
+                  {
+                    "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+                    "type": "Call",
+                    "description": "Initial discovery call",
+                    "date": "2023-04-10T10:00:00Z",
+                    "createdBy": "John Doe"
+                  },
+                  {
+                    "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+                    "type": "Meeting",
+                    "description": "Product demo with technical team",
+                    "date": "2023-04-20T14:00:00Z",
+                    "createdBy": "John Doe"
+                  }
+                ],
+                "createdAt": "2023-04-10T09:15:00Z",
+                "updatedAt": "2023-05-15T14:30:00Z"
+              },
+              "message": "Deal retrieved successfully"
+            }
+          },
+          {
+            "name": "Create Deal",
+            "method": "POST",
+            "path": "/api/deals",
+            "description": "Create a new deal",
+            "requestPayload": {
+              "title": "Cloud Migration Project",
+              "description": "Migration of on-premise infrastructure to cloud",
+              "clientName": "XYZ Industries",
+              "clientContact": "Bob Johnson",
+              "clientEmail": "bob.johnson@xyz.com",
+              "value": 175000.0,
+              "currencyCode": "USD",
+              "status": "Negotiation"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+                "title": "Cloud Migration Project"
+              },
+              "message": "Deal created successfully"
+            }
+          },
+          {
+            "name": "Update Deal",
+            "method": "PUT",
+            "path": "/api/deals/{id}",
+            "description": "Update an existing deal",
+            "requestPayload": {
+              "value": 185000.0,
+              "status": "Closed",
+              "closedDate": "2023-06-01T16:45:00Z"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Deal updated successfully"
+            }
+          },
+          {
+            "name": "Add Deal Activity",
+            "method": "POST",
+            "path": "/api/deals/{id}/activities",
+            "description": "Add an activity to a deal",
+            "requestPayload": {
+              "type": "Proposal",
+              "description": "Sent final proposal with pricing",
+              "date": "2023-05-25T11:30:00Z"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+                "type": "Proposal",
+                "description": "Sent final proposal with pricing",
+                "date": "2023-05-25T11:30:00Z"
+              },
+              "message": "Activity added successfully"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Payments",
+        "description": "Manage incentive payments",
+        "endpoints": [
+          {
+            "name": "Get Payments",
+            "method": "GET",
+            "path": "/api/payments",
+            "description": "Get a list of payments with pagination",
+            "queryParams": {
+              "pageNumber": "Page number (default: 1)",
+              "pageSize": "Number of items per page (default: 10)",
+              "status": "Filter by payment status (optional)"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "items": [
+                  {
+                    "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                    "amount": 12500.0,
+                    "currencyCode": "USD",
+                    "status": "Processed",
+                    "paymentDate": "2023-06-15T00:00:00Z",
+                    "recipientId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                    "recipientName": "John Doe",
+                    "dealId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                    "dealTitle": "Enterprise Software License",
+                    "incentiveRuleId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                    "incentiveRuleName": "Q2 Sales Bonus",
+                    "createdAt": "2023-06-01T10:00:00Z"
+                  }
+                ],
+                "totalCount": 1,
+                "pageNumber": 1,
+                "pageSize": 10,
+                "totalPages": 1
+              },
+              "message": "Payments retrieved successfully"
+            }
+          },
+          {
+            "name": "Get Payment by ID",
+            "method": "GET",
+            "path": "/api/payments/{id}",
+            "description": "Get a specific payment by ID",
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "amount": 12500.0,
+                "currencyCode": "USD",
+                "status": "Processed",
+                "paymentDate": "2023-06-15T00:00:00Z",
+                "paymentReference": "PAY-2023-06-001",
+                "recipientId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+                "recipientName": "John Doe",
+                "dealId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "dealTitle": "Enterprise Software License",
+                "incentiveRuleId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+                "incentiveRuleName": "Q2 Sales Bonus",
+                "notes": "Q2 performance bonus for exceeding sales target",
+                "createdAt": "2023-06-01T10:00:00Z",
+                "createdBy": "Admin User",
+                "updatedAt": "2023-06-15T09:30:00Z",
+                "updatedBy": "Finance User"
+              },
+              "message": "Payment retrieved successfully"
+            }
+          },
+          {
+            "name": "Create Payment",
+            "method": "POST",
+            "path": "/api/payments",
+            "description": "Create a new payment",
+            "requestPayload": {
+              "amount": 9250.0,
+              "currencyCode": "USD",
+              "status": "Pending",
+              "paymentDate": "2023-07-15T00:00:00Z",
+              "paymentReference": "PAY-2023-07-001",
+              "recipientId": "8f7e6d5c-4b3a-2c1d-0e9f-8a7b6c5d4e3f",
+              "dealId": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+              "incentiveRuleId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+              "notes": "Incentive payment for Cloud Migration Project"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": {
+                "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+                "amount": 9250.0,
+                "status": "Pending"
+              },
+              "message": "Payment created successfully"
+            }
+          },
+          {
+            "name": "Update Payment",
+            "method": "PUT",
+            "path": "/api/payments/{id}",
+            "description": "Update an existing payment",
+            "requestPayload": {
+              "status": "Processed",
+              "paymentDate": "2023-07-10T00:00:00Z",
+              "notes": "Processed early due to fiscal year end"
+            },
+            "responsePayload": {
+              "success": true,
+              "data": null,
+              "message": "Payment updated successfully"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

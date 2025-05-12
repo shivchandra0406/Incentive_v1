@@ -75,7 +75,7 @@ namespace Incentive.API.Controllers
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<DealActivityDto>>> GetActivitiesByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<DealActivityDto>>> GetActivitiesByUserId(Guid userId)
         {
             var activities = await _dealActivityRepository.GetActivitiesByUserIdAsync(userId);
             return Ok(_mapper.Map<IEnumerable<DealActivityDto>>(activities));
@@ -110,11 +110,6 @@ namespace Incentive.API.Controllers
 
             var activity = _mapper.Map<DealActivity>(createDealActivityDto);
             
-            // Set the current user as the creator
-            activity.CreatedBy = User.Identity?.Name;
-            activity.UserId = User.Identity?.Name;
-            activity.ActivityDate = DateTime.UtcNow;
-            
             var createdActivity = await _dealActivityRepository.AddAsync(activity);
             
             return CreatedAtAction(nameof(GetDealActivityById), new { id = createdActivity.Id }, _mapper.Map<DealActivityDto>(createdActivity));
@@ -133,11 +128,6 @@ namespace Incentive.API.Controllers
             }
 
             _mapper.Map(updateDealActivityDto, activity);
-            
-            // Set the current user as the modifier
-            activity.LastModifiedBy = User.Identity?.Name;
-            activity.LastModifiedAt = DateTime.UtcNow;
-            
             await _dealActivityRepository.UpdateAsync(activity);
             
             return NoContent();

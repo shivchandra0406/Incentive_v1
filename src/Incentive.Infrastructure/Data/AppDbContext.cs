@@ -185,7 +185,7 @@ namespace Incentive.Infrastructure.Data
             if (entry.State != EntityState.Deleted)
                 return;
 
-            if (entity is UserSoftDeletableEntity userDeletable)
+            if (entity is UserAuditableEntity userDeletable)
             {
                 entry.State = EntityState.Modified;
                 userDeletable.IsDeleted = true;

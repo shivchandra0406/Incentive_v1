@@ -1,4 +1,4 @@
-namespace Incentive.Application.Interfaces
+namespace Incentive.Application.Common.Interfaces
 {
     /// <summary>
     /// File storage service interface

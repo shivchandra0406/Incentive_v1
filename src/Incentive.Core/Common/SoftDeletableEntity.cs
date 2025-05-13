@@ -5,14 +5,10 @@ namespace Incentive.Core.Common
     /// <summary>
     /// Base entity with soft delete support
     /// </summary>
-    public interface SoftDeletableEntity 
+    public abstract class SoftDeletableEntity : MultiTenantEntity
     {
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
-        
-    }
-    public interface UserSoftDeletableEntity: SoftDeletableEntity
-    {
-        public Guid? DeletedBy { get; set; }
+        public new bool IsDeleted { get; set; } = false;
+        public new DateTime? DeletedAt { get; set; }
+        public new string? DeletedBy { get; set; }
     }
 }

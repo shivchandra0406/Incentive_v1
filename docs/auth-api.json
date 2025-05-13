@@ -1,0 +1,176 @@
+{
+  "apiName": "Authentication API",
+  "description": "API endpoints for authentication and user registration in the Incentive Management System",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "X-Tenant-Id",
+        "description": "Tenant identifier (required for all endpoints)",
+        "example": "tenant-123"
+      }
+    ],
+    "optional": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication (required for protected endpoints)",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Login",
+      "description": "Authenticate a user and get a JWT token",
+      "url": "/auth/login",
+      "method": "POST",
+      "requiresAuth": false,
+      "requestBody": {
+        "type": "LoginDto",
+        "example": {
+          "userName": "johndoe",
+          "password": "Password123!"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<AuthResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Login successful",
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "refreshToken": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+            "expiration": "2023-01-01T01:00:00Z",
+            "userId": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "roles": ["Admin"]
+          }
+        }
+      }
+    },
+    {
+      "name": "Register",
+      "description": "Register a new user",
+      "url": "/auth/register",
+      "method": "POST",
+      "requiresAuth": false,
+      "requestBody": {
+        "type": "RegisterDto",
+        "example": {
+          "userName": "janedoe",
+          "email": "jane.doe@example.com",
+          "password": "Password123!",
+          "confirmPassword": "Password123!",
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "tenantId": "tenant-123",
+          "roles": ["User"]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User registered successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-456",
+            "message": "User registered successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "description": "Refresh an expired JWT token using a refresh token",
+      "url": "/auth/refresh-token",
+      "method": "POST",
+      "requiresAuth": false,
+      "requestBody": {
+        "type": "RefreshTokenDto",
+        "example": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+          "refreshToken": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<AuthResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Token refreshed successfully",
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "refreshToken": "q7r8s9t0-u1v2-w3x4-y5z6-a7b8c9d0e1f2",
+            "expiration": "2023-01-01T02:00:00Z",
+            "userId": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "roles": ["Admin"]
+          }
+        }
+      }
+    },
+    {
+      "name": "Validate Token",
+      "description": "Validate a JWT token",
+      "url": "/auth/validate-token",
+      "method": "POST",
+      "requiresAuth": false,
+      "requestBody": {
+        "type": "ValidateTokenDto",
+        "example": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        }
+      },
+      "response": {
+        "type": "BaseResponse<bool>",
+        "example": {
+          "succeeded": true,
+          "message": "Token is valid",
+          "data": true
+        }
+      }
+    },
+    {
+      "name": "Get Current User",
+      "description": "Get the currently authenticated user's information",
+      "url": "/auth/me",
+      "method": "GET",
+      "requiresAuth": true,
+      "response": {
+        "type": "BaseResponse<UserDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User retrieved successfully",
+          "data": {
+            "id": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "isActive": true,
+            "createdAt": "2023-01-01T00:00:00Z",
+            "createdBy": "system",
+            "lastModifiedAt": "2023-01-01T00:00:00Z",
+            "lastModifiedBy": "system",
+            "roles": ["Admin"],
+            "claims": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

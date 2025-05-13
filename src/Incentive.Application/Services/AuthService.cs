@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
 
@@ -15,7 +12,7 @@ namespace Incentive.Application.Services
             _identityService = identityService;
         }
 
-        public async Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration)> LoginAsync(string userName, string password)
+        public async Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration, List<string>? userRoles, ApplicationUser? user)> LoginAsync(string userName, string password)
         {
             return await _identityService.LoginAsync(userName, password);
         }
@@ -48,5 +45,6 @@ namespace Incentive.Application.Services
             // For now, we'll just return null
             return null;
         }
+        
     }
 }

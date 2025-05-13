@@ -13,7 +13,7 @@ namespace Incentive.Core.Entities
         public Guid IncentiveRuleId { get; set; }
 
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public new string UserId { get; set; } = string.Empty;
 
         [Required]
         public Guid DealId { get; set; }

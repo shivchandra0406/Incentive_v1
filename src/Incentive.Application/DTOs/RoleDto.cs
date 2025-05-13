@@ -55,4 +55,25 @@ namespace Incentive.Application.DTOs
         public string UserId { get; set; }
         public string RoleName { get; set; }
     }
+
+    public class CreateRoleWithClaimsDto
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string TenantId { get; set; }
+        public List<PermissionDto> Permissions { get; set; } = new List<PermissionDto>();
+    }
+
+    public class RoleWithClaimsDto
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string TenantId { get; set; }
+        public List<PermissionDto> Permissions { get; set; } = new List<PermissionDto>();
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? LastModifiedAt { get; set; }
+        public string LastModifiedBy { get; set; }
+    }
 }

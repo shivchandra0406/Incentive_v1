@@ -30,7 +30,7 @@ namespace Incentive.Infrastructure.MultiTenancy
         {
             try
             {
-                return await _dbContext.Tenants.FindAsync(Guid.Parse(tenantId)) ?? null!;
+                return await _dbContext.Tenants.FindAsync(tenantId) ?? null!;
             }
             catch (Exception ex)
             {

@@ -1,0 +1,425 @@
+{
+  "apiName": "User Permissions API",
+  "description": "API endpoints for managing user-specific permissions in the Incentive Management System",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      {
+        "name": "X-Tenant-Id",
+        "description": "Tenant identifier",
+        "example": "tenant-123"
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Assign Permissions to User",
+      "description": "Assign direct permissions to a user (in addition to role-based permissions)",
+      "url": "/users/{userId}/direct-permissions",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "userId",
+          "description": "ID of the user",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "AssignUserPermissionsDto",
+        "example": {
+          "permissions": [
+            {
+              "claimType": "permission",
+              "claimValue": "reports.approve"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "payments.view"
+            }
+          ]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserPermissionsDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Permissions assigned successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "roles": ["Admin", "Sales"],
+            "rolePermissions": {
+              "Admin": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.create"
+                }
+              ],
+              "Sales": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.create"
+                }
+              ]
+            },
+            "directPermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              }
+            ],
+            "effectivePermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Update User Direct Permissions",
+      "description": "Replace all direct permissions for a user",
+      "url": "/users/{userId}/direct-permissions",
+      "method": "PUT",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "userId",
+          "description": "ID of the user",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UpdateUserPermissionsDto",
+        "example": {
+          "permissions": [
+            {
+              "claimType": "permission",
+              "claimValue": "reports.approve"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "payments.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "payments.approve"
+            }
+          ]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserPermissionsDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User permissions updated successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "roles": ["Admin", "Sales"],
+            "rolePermissions": {
+              "Admin": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.create"
+                }
+              ],
+              "Sales": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.create"
+                }
+              ]
+            },
+            "directPermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.approve"
+              }
+            ],
+            "effectivePermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.approve"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Add User Direct Permission",
+      "description": "Add a single direct permission to a user",
+      "url": "/users/{userId}/direct-permissions/add",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "userId",
+          "description": "ID of the user",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "PermissionDto",
+        "example": {
+          "claimType": "permission",
+          "claimValue": "payments.approve"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserPermissionsDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Permission added successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "roles": ["Admin", "Sales"],
+            "rolePermissions": {
+              "Admin": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.create"
+                }
+              ],
+              "Sales": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.create"
+                }
+              ]
+            },
+            "directPermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.approve"
+              }
+            ],
+            "effectivePermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.approve"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Remove User Direct Permission",
+      "description": "Remove a single direct permission from a user",
+      "url": "/users/{userId}/direct-permissions/remove",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "userId",
+          "description": "ID of the user",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "PermissionDto",
+        "example": {
+          "claimType": "permission",
+          "claimValue": "payments.approve"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserPermissionsDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Permission removed successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "roles": ["Admin", "Sales"],
+            "rolePermissions": {
+              "Admin": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.create"
+                }
+              ],
+              "Sales": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.create"
+                }
+              ]
+            },
+            "directPermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              }
+            ],
+            "effectivePermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "payments.view"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

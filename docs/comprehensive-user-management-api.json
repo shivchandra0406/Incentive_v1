@@ -1,0 +1,315 @@
+{
+  "apiName": "Comprehensive User Management API",
+  "description": "API endpoints for managing users with their roles and permissions in a single operation",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      {
+        "name": "X-Tenant-Id",
+        "description": "Tenant identifier",
+        "example": "tenant-123"
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Create User with Roles and Permissions",
+      "description": "Create a new user with specified roles and direct permissions in a single operation",
+      "url": "/users/comprehensive",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "CreateComprehensiveUserDto",
+        "example": {
+          "userDetails": {
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "password": "Password123!",
+            "confirmPassword": "Password123!",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "isActive": true
+          },
+          "roles": ["Admin", "Manager"],
+          "directPermissions": [
+            {
+              "claimType": "permission",
+              "claimValue": "users.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "users.create"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "users.edit"
+            }
+          ]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<ComprehensiveUserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User created successfully with roles and permissions",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "isActive": true,
+            "roles": ["Admin", "Manager"],
+            "permissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.edit"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.delete"
+              }
+            ],
+            "createdAt": "2023-01-01T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "name": "Update User with Roles and Permissions",
+      "description": "Update an existing user with specified roles and direct permissions in a single operation",
+      "url": "/users/{id}/comprehensive",
+      "method": "PUT",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UpdateComprehensiveUserDto",
+        "example": {
+          "userDetails": {
+            "email": "john.updated@example.com",
+            "firstName": "John",
+            "lastName": "Doe Updated",
+            "isActive": true
+          },
+          "roles": {
+            "add": ["ProjectManager"],
+            "remove": ["Manager"]
+          },
+          "directPermissions": {
+            "add": [
+              {
+                "claimType": "permission",
+                "claimValue": "projects.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "projects.edit"
+              }
+            ],
+            "remove": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.edit"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "type": "BaseResponse<ComprehensiveUserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User updated successfully with roles and permissions",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "email": "john.updated@example.com",
+            "firstName": "John",
+            "lastName": "Doe Updated",
+            "tenantId": "tenant-123",
+            "isActive": true,
+            "roles": ["Admin", "ProjectManager"],
+            "permissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.delete"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "projects.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "projects.edit"
+              }
+            ],
+            "lastModifiedAt": "2023-01-02T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "name": "Get Comprehensive User Details",
+      "description": "Get complete user details including roles and permissions in a single operation",
+      "url": "/users/{id}/comprehensive",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<ComprehensiveUserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User details retrieved successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "isActive": true,
+            "roles": ["Admin", "Manager"],
+            "permissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.edit"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.delete"
+              }
+            ],
+            "createdAt": "2023-01-01T00:00:00Z",
+            "createdBy": "system",
+            "lastModifiedAt": "2023-01-01T00:00:00Z",
+            "lastModifiedBy": "system"
+          }
+        }
+      }
+    }
+  ],
+  "dataModels": {
+    "CreateComprehensiveUserDto": {
+      "description": "Data model for creating a user with roles and permissions",
+      "properties": {
+        "userDetails": {
+          "type": "object",
+          "description": "Basic user information",
+          "properties": {
+            "userName": {
+              "type": "string",
+              "description": "Unique username for the user",
+              "required": true
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the user",
+              "required": true
+            },
+            "password": {
+              "type": "string",
+              "description": "Password for the user account",
+              "required": true
+            },
+            "confirmPassword": {
+              "type": "string",
+              "description": "Confirmation of the password",
+              "required": true
+            },
+            "firstName": {
+              "type": "string",
+              "description": "First name of the user",
+              "required": true
+            },
+            "lastName": {
+              "type": "string",
+              "description": "Last name of the user",
+              "required": true
+            },
+            "tenantId": {
+              "type": "string",
+              "description": "ID of the tenant the user belongs to"
+            },
+            "isActive": {
+              "type": "boolean",
+              "description": "Whether the user account is active",
+              "default": true
+            }
+          }
+        },
+        "roles": {
+          "type": "array",
+          "description": "Roles to assign to the user",
+          "items": {
+            "type": "string"
+          }
+        },
+        "directPermissions": {
+          "type": "array",
+          "description": "Direct permissions to assign to the user (in addition to role-based permissions)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "claimType": {
+                "type": "string",
+                "description": "Type of the permission claim",
+                "required": true
+              },
+              "claimValue": {
+                "type": "string",
+                "description": "Value of the permission claim",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

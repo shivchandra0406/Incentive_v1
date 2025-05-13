@@ -61,7 +61,41 @@ namespace Incentive.Infrastructure.Identity
             // Admin has all permissions
             return Permissions.GetAllPermissions();
         }
+        public static List<string> GetDefaultPermission()
+        {
+            return new List<string>
+            {
+                Permissions.ViewUsers,
+                Permissions.CreateUsers,
+                Permissions.EditUsers,
+                Permissions.DeleteUsers,
+                
+                // Role permissions
+                Permissions.ViewRoles,
+                Permissions.CreateRoles,
+                Permissions.EditRoles,
+                Permissions.DeleteRoles,
+                
+                // IncentiveRule permissions
+                Permissions.ViewIncentiveRules,
+                Permissions.CreateIncentiveRules,
+                Permissions.EditIncentiveRules,
+                Permissions.DeleteUsers,
+                
+                // Deal permissions
+                Permissions.ViewDeals,
+                Permissions.CreateDeals,
+                Permissions.EditDeals,
+                Permissions.DeleteDeals,
+                
+                // Payment permissions
+                Permissions.ViewPayments,
+                Permissions.CreatePayments,
+                Permissions.EditPayments,
+               
+            };
 
+        }
         /// <summary>
         /// Gets all permissions for the Manager role
         /// </summary>
@@ -76,10 +110,7 @@ namespace Incentive.Infrastructure.Identity
                 
                 // Role permissions
                 Permissions.ViewRoles,
-                
-                // Tenant permissions
-                Permissions.ViewTenants,
-                
+               
                 // IncentiveRule permissions
                 Permissions.ViewIncentiveRules,
                 Permissions.CreateIncentiveRules,
@@ -95,11 +126,6 @@ namespace Incentive.Infrastructure.Identity
                 Permissions.ViewPayments,
                 Permissions.CreatePayments,
                 Permissions.EditPayments,
-                
-                // DealActivity permissions
-                Permissions.ViewDealActivities,
-                Permissions.CreateDealActivities,
-                Permissions.EditDealActivities,
                 
                 // IncentiveEarning permissions
                 Permissions.ViewIncentiveEarnings,
@@ -122,11 +148,7 @@ namespace Incentive.Infrastructure.Identity
                 
                 // Payment permissions
                 Permissions.ViewPayments,
-                
-                // DealActivity permissions
-                Permissions.ViewDealActivities,
-                Permissions.CreateDealActivities,
-                
+             
                 // IncentiveRule permissions
                 Permissions.ViewIncentiveRules,
                 
@@ -149,7 +171,6 @@ namespace Incentive.Infrastructure.Identity
                 Permissions.ViewIncentiveRules,
                 Permissions.ViewDeals,
                 Permissions.ViewPayments,
-                Permissions.ViewDealActivities,
                 Permissions.ViewIncentiveEarnings
             };
         }
@@ -161,7 +182,6 @@ namespace Incentive.Infrastructure.Identity
                 Permissions.ViewIncentiveRules,
                 Permissions.ViewDeals,
                 Permissions.ViewPayments,
-                Permissions.ViewDealActivities,
                 Permissions.ViewIncentiveEarnings
             };
         }

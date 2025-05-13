@@ -427,6 +427,40 @@ namespace Incentive.Infrastructure.Identity
             return (false, string.Empty, string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
+        public async Task<(bool Succeeded, string RoleId, string Message)> CreateRoleWithClaimsAsync(string name, string description, string tenantId, IEnumerable<Claim> claims)
+        {
+            // Create the role first
+            var createRoleResult = await CreateRoleAsync(name, description, tenantId);
+
+            if (!createRoleResult.Succeeded)
+            {
+                return createRoleResult;
+            }
+
+            var roleId = createRoleResult.RoleId;
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return (false, string.Empty, "Role was created but could not be retrieved");
+            }
+
+            // Add claims to the role
+            foreach (var claim in claims)
+            {
+                var addClaimResult = await _roleManager.AddClaimAsync(role, claim);
+
+                if (!addClaimResult.Succeeded)
+                {
+                    // If adding claims fails, we should still return success for the role creation
+                    // but include a warning in the message
+                    return (true, roleId, $"Role created successfully but some claims could not be added: {string.Join(", ", addClaimResult.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            return (true, roleId, "Role created successfully with all claims");
+        }
+
         public async Task<bool> UpdateRoleAsync(string roleId, string name, string description)
         {
             var role = await _roleManager.FindByIdAsync(roleId);
@@ -729,6 +763,118 @@ namespace Incentive.Infrastructure.Identity
                 LastModifiedAt = role.LastModifiedAt,
                 LastModifiedBy = role.LastModifiedBy
             };
+        }
+
+        // Permission Management Implementation
+        public async Task<Dictionary<string, IList<Claim>>> GetAllRolePermissionsAsync()
+        {
+            var result = new Dictionary<string, IList<Claim>>();
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            foreach (var role in roles)
+            {
+                if (role.Name != null)
+                {
+                    var claims = await _roleManager.GetClaimsAsync(role);
+                    var permissionClaims = claims.Where(c => c.Type == "Permission").ToList();
+                    result.Add(role.Name, permissionClaims);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<IList<Claim>> GetRolePermissionsByNameAsync(string roleName)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                return new List<Claim>();
+            }
+
+            var claims = await _roleManager.GetClaimsAsync(role);
+            return claims.Where(c => c.Type == "Permission").ToList();
+        }
+
+        public async Task<bool> UpdateRolePermissionsAsync(string roleName, IEnumerable<Claim> permissions)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            // Get current permission claims
+            var currentClaims = await _roleManager.GetClaimsAsync(role);
+            var currentPermissionClaims = currentClaims.Where(c => c.Type == "Permission").ToList();
+
+            // Remove all current permission claims
+            foreach (var claim in currentPermissionClaims)
+            {
+                var result = await _roleManager.RemoveClaimAsync(role, claim);
+                if (!result.Succeeded)
+                {
+                    return false;
+                }
+            }
+
+            // Add new permission claims
+            foreach (var claim in permissions)
+            {
+                var newClaim = new Claim(claim.Type, claim.Value);
+                var result = await _roleManager.AddClaimAsync(role, newClaim);
+                if (!result.Succeeded)
+                {
+                    return false;
+                }
+            }
+
+            // Synchronize claims for all users in this role
+            if (role.Name != null)
+            {
+                await _userClaimManager.SynchronizeUsersInRoleAsync(role.Name);
+            }
+
+            return true;
+        }
+
+        public async Task<(IList<string> Roles, Dictionary<string, IList<Claim>> RolePermissions, IList<Claim> DirectPermissions)> GetUserPermissionsAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return (new List<string>(), new Dictionary<string, IList<Claim>>(), new List<Claim>());
+            }
+
+            // Get user roles
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Get permissions from each role
+            var rolePermissions = new Dictionary<string, IList<Claim>>();
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    var permissionClaims = roleClaims.Where(c => c.Type == "Permission").ToList();
+                    rolePermissions.Add(roleName, permissionClaims);
+                }
+            }
+
+            // Get direct user claims
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var directPermissions = userClaims.Where(c => c.Type == "Permission").ToList();
+
+            return (roles.ToList(), rolePermissions, directPermissions);
+        }
+
+        public List<string> GetDefaultPermission()
+        {
+            return Permissions.GetAllPermissions();
         }
     }
 }

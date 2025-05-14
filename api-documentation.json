@@ -6,13 +6,13 @@
     "apiStandards": {
       "headers": {
         "Authorization": "Bearer {jwt_token}",
-        "X-Tenant-Id": "Tenant identifier (e.g., 'default')"
+        "tenantId": "Tenant identifier (e.g., 'default')"
       },
       "responseFormat": {
-        "success": "Boolean indicating if the request was successful",
+        "succeeded": "Boolean indicating if the request was successful",
         "data": "The response data (null for operations that don't return data)",
         "message": "A human-readable message describing the result",
-        "errors": "Array of error messages (only present when success is false)"
+        "errors": "Array of error messages (only present when succeeded is false)"
       },
       "pagination": {
         "pageNumber": "Current page number (1-based)",
@@ -90,7 +90,7 @@
               "password": "Admin123!"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "refreshToken": "6ce8c9d1-9c3c-4d5a-b8e2-7e68c3f4a5b2",
@@ -99,7 +99,8 @@
                 "email": "admin@incentive.com",
                 "roles": ["Admin"]
               },
-              "message": "Login successful"
+              "message": "Login successful",
+              "errors": []
             }
           },
           {
@@ -115,12 +116,13 @@
               "lastName": "Doe"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "userId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "email": "user@example.com"
               },
-              "message": "User registered successfully"
+              "message": "User registered successfully",
+              "errors": []
             }
           },
           {
@@ -132,13 +134,14 @@
               "refreshToken": "6ce8c9d1-9c3c-4d5a-b8e2-7e68c3f4a5b2"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "refreshToken": "7d9e0f1g-2h3i-4j5k-6l7m-8n9o0p1q2r3",
                 "expiresIn": 3600
               },
-              "message": "Token refreshed successfully"
+              "message": "Token refreshed successfully",
+              "errors": []
             }
           }
         ]
@@ -157,7 +160,7 @@
               "pageSize": "Number of items per page (default: 10)"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "items": [
                   {
@@ -175,7 +178,8 @@
                 "pageSize": 10,
                 "totalPages": 1
               },
-              "message": "Users retrieved successfully"
+              "message": "Users retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -184,7 +188,7 @@
             "path": "/api/users/{id}",
             "description": "Get a specific user by ID",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "email": "user@example.com",
@@ -205,7 +209,8 @@
                 "createdAt": "2023-05-11T14:30:00Z",
                 "updatedAt": "2023-05-11T14:30:00Z"
               },
-              "message": "User retrieved successfully"
+              "message": "User retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -222,12 +227,13 @@
               "roles": ["Manager"]
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
                 "email": "newuser@example.com"
               },
-              "message": "User created successfully"
+              "message": "User created successfully",
+              "errors": []
             }
           },
           {
@@ -241,9 +247,10 @@
               "isActive": true
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "User updated successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "User updated successfully",
+              "errors": []
             }
           },
           {
@@ -255,9 +262,10 @@
               "role": "Manager"
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Role assigned successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Role assigned successfully",
+              "errors": []
             }
           }
         ]
@@ -272,7 +280,7 @@
             "path": "/api/roles",
             "description": "Get a list of all roles",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": [
                 {
                   "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
@@ -289,7 +297,8 @@
                   "claimCount": 16
                 }
               ],
-              "message": "Roles retrieved successfully"
+              "message": "Roles retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -298,7 +307,7 @@
             "path": "/api/roles/{id}",
             "description": "Get a specific role by ID",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "name": "Admin",
@@ -317,7 +326,8 @@
                   }
                 ]
               },
-              "message": "Role retrieved successfully"
+              "message": "Role retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -330,12 +340,13 @@
               "description": "Manager for sales team"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
                 "name": "SalesManager"
               },
-              "message": "Role created successfully"
+              "message": "Role created successfully",
+              "errors": []
             }
           },
           {
@@ -349,9 +360,10 @@
               "claimValue": "ViewDeals"
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Claim added to role successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Claim added to role successfully",
+              "errors": []
             }
           }
         ]
@@ -370,7 +382,7 @@
               "pageSize": "Number of items per page (default: 10)"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "items": [
                   {
@@ -396,7 +408,8 @@
                 "pageSize": 10,
                 "totalPages": 1
               },
-              "message": "Incentive rules retrieved successfully"
+              "message": "Incentive rules retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -405,7 +418,7 @@
             "path": "/api/incentive-rules/{id}",
             "description": "Get a specific incentive rule by ID",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "name": "Q2 Sales Bonus",
@@ -425,7 +438,8 @@
                 "updatedAt": "2023-03-16T11:20:00Z",
                 "updatedBy": "Admin User"
               },
-              "message": "Incentive rule retrieved successfully"
+              "message": "Incentive rule retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -448,12 +462,13 @@
               "appliedRuleType": "Team"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
                 "name": "Year-End Bonus"
               },
-              "message": "Incentive rule created successfully"
+              "message": "Incentive rule created successfully",
+              "errors": []
             }
           },
           {
@@ -468,9 +483,10 @@
               "calculationValue": 12.0
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Incentive rule updated successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Incentive rule updated successfully",
+              "errors": []
             }
           },
           {
@@ -479,9 +495,10 @@
             "path": "/api/incentive-rules/{id}",
             "description": "Delete an incentive rule",
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Incentive rule deleted successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Incentive rule deleted successfully",
+              "errors": []
             }
           }
         ]
@@ -501,7 +518,7 @@
               "status": "Filter by deal status (optional)"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "items": [
                   {
@@ -523,7 +540,8 @@
                 "pageSize": 10,
                 "totalPages": 1
               },
-              "message": "Deals retrieved successfully"
+              "message": "Deals retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -532,7 +550,7 @@
             "path": "/api/deals/{id}",
             "description": "Get a specific deal by ID",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "title": "Enterprise Software License",
@@ -565,7 +583,8 @@
                 "createdAt": "2023-04-10T09:15:00Z",
                 "updatedAt": "2023-05-15T14:30:00Z"
               },
-              "message": "Deal retrieved successfully"
+              "message": "Deal retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -584,12 +603,13 @@
               "status": "Negotiation"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
                 "title": "Cloud Migration Project"
               },
-              "message": "Deal created successfully"
+              "message": "Deal created successfully",
+              "errors": []
             }
           },
           {
@@ -603,9 +623,10 @@
               "closedDate": "2023-06-01T16:45:00Z"
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Deal updated successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Deal updated successfully",
+              "errors": []
             }
           },
           {
@@ -619,14 +640,15 @@
               "date": "2023-05-25T11:30:00Z"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
                 "type": "Proposal",
                 "description": "Sent final proposal with pricing",
                 "date": "2023-05-25T11:30:00Z"
               },
-              "message": "Activity added successfully"
+              "message": "Activity added successfully",
+              "errors": []
             }
           }
         ]
@@ -646,7 +668,7 @@
               "status": "Filter by payment status (optional)"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "items": [
                   {
@@ -669,7 +691,8 @@
                 "pageSize": 10,
                 "totalPages": 1
               },
-              "message": "Payments retrieved successfully"
+              "message": "Payments retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -678,7 +701,7 @@
             "path": "/api/payments/{id}",
             "description": "Get a specific payment by ID",
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
                 "amount": 12500.0,
@@ -698,7 +721,8 @@
                 "updatedAt": "2023-06-15T09:30:00Z",
                 "updatedBy": "Finance User"
               },
-              "message": "Payment retrieved successfully"
+              "message": "Payment retrieved successfully",
+              "errors": []
             }
           },
           {
@@ -718,13 +742,14 @@
               "notes": "Incentive payment for Cloud Migration Project"
             },
             "responsePayload": {
-              "success": true,
+              "succeeded": true,
               "data": {
                 "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
                 "amount": 9250.0,
                 "status": "Pending"
               },
-              "message": "Payment created successfully"
+              "message": "Payment created successfully",
+              "errors": []
             }
           },
           {
@@ -738,9 +763,10 @@
               "notes": "Processed early due to fiscal year end"
             },
             "responsePayload": {
-              "success": true,
-              "data": null,
-              "message": "Payment updated successfully"
+              "succeeded": true,
+              "data": {},
+              "message": "Payment updated successfully",
+              "errors": []
             }
           }
         ]

@@ -1,0 +1,233 @@
+{
+  "apiName": "Role Management API",
+  "description": "API endpoints for managing roles and role claims in the Incentive Management System",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      {
+        "name": "X-Tenant-Id",
+        "description": "Tenant identifier",
+        "example": "tenant-123"
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Get All Roles",
+      "description": "Retrieve all roles for the current tenant",
+      "url": "/roles",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "response": {
+        "type": "IEnumerable<RoleDto>",
+        "example": [
+          {
+            "id": "role-123",
+            "name": "Admin",
+            "description": "Administrator role with full access",
+            "tenantId": "tenant-123",
+            "createdAt": "2023-01-01T00:00:00Z",
+            "createdBy": "system",
+            "lastModifiedAt": "2023-01-01T00:00:00Z",
+            "lastModifiedBy": "system"
+          },
+          {
+            "id": "role-456",
+            "name": "User",
+            "description": "Standard user with limited access",
+            "tenantId": "tenant-123",
+            "createdAt": "2023-01-01T00:00:00Z",
+            "createdBy": "system",
+            "lastModifiedAt": "2023-01-01T00:00:00Z",
+            "lastModifiedBy": "system"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Get Role by ID",
+      "description": "Retrieve a specific role by ID",
+      "url": "/roles/{id}",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "Role ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "RoleDto",
+        "example": {
+          "id": "role-123",
+          "name": "Admin",
+          "description": "Administrator role with full access",
+          "tenantId": "tenant-123",
+          "createdAt": "2023-01-01T00:00:00Z",
+          "createdBy": "system",
+          "lastModifiedAt": "2023-01-01T00:00:00Z",
+          "lastModifiedBy": "system"
+        }
+      }
+    },
+    {
+      "name": "Create Role",
+      "description": "Create a new role",
+      "url": "/roles",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "CreateRoleDto",
+        "example": {
+          "name": "Manager",
+          "description": "Manager role with specific permissions"
+        }
+      },
+      "response": {
+        "type": "RoleDto",
+        "example": {
+          "id": "role-789",
+          "name": "Manager",
+          "description": "Manager role with specific permissions",
+          "tenantId": "tenant-123",
+          "createdAt": "2023-01-01T00:00:00Z",
+          "createdBy": "system",
+          "lastModifiedAt": "2023-01-01T00:00:00Z",
+          "lastModifiedBy": "system"
+        }
+      }
+    },
+    {
+      "name": "Update Role",
+      "description": "Update an existing role",
+      "url": "/roles/{id}",
+      "method": "PUT",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "Role ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UpdateRoleDto",
+        "example": {
+          "name": "Senior Manager",
+          "description": "Senior Manager role with extended permissions"
+        }
+      },
+      "response": {
+        "type": "RoleDto",
+        "example": {
+          "id": "role-789",
+          "name": "Senior Manager",
+          "description": "Senior Manager role with extended permissions",
+          "tenantId": "tenant-123",
+          "createdAt": "2023-01-01T00:00:00Z",
+          "createdBy": "system",
+          "lastModifiedAt": "2023-01-02T00:00:00Z",
+          "lastModifiedBy": "system"
+        }
+      }
+    },
+    {
+      "name": "Delete Role",
+      "description": "Delete a role",
+      "url": "/roles/{id}",
+      "method": "DELETE",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "Role ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "NoContent",
+        "example": null
+      }
+    },
+    {
+      "name": "Assign Role to User",
+      "description": "Assign a role to a user",
+      "url": "/roles/assign",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "AssignRoleDto",
+        "example": {
+          "userId": "user-123",
+          "roleName": "Manager"
+        }
+      },
+      "response": {
+        "type": "NoContent",
+        "example": null
+      }
+    },
+    {
+      "name": "Get Role Claims",
+      "description": "Get claims assigned to a role",
+      "url": "/roleclaims/{roleId}",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "roleId",
+          "description": "Role ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "IEnumerable<RoleClaimDto>",
+        "example": [
+          {
+            "roleId": "role-123",
+            "claimType": "permission",
+            "claimValue": "users.view"
+          },
+          {
+            "roleId": "role-123",
+            "claimType": "permission",
+            "claimValue": "users.create"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Add Claim to Role",
+      "description": "Add a claim to a role",
+      "url": "/roleclaims",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "CreateRoleClaimDto",
+        "example": {
+          "roleId": "role-123",
+          "claimType": "permission",
+          "claimValue": "users.delete"
+        }
+      },
+      "response": {
+        "type": "NoContent",
+        "example": null
+      }
+    }
+  ]
+}

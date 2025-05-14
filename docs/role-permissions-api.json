@@ -1,0 +1,280 @@
+{
+  "apiName": "Role Permissions API",
+  "description": "API endpoints for managing role-based permissions in the Incentive Management System",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      {
+        "name": "X-Tenant-Id",
+        "description": "Tenant identifier",
+        "example": "tenant-123"
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Get All Role Permissions",
+      "description": "Retrieve all permissions grouped by role",
+      "url": "/roles/permissions",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "response": {
+        "type": "BaseResponse<Dictionary<string, IEnumerable<PermissionDto>>>",
+        "example": {
+          "succeeded": true,
+          "message": "Role permissions retrieved successfully",
+          "data": {
+            "Admin": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.edit"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.delete"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "roles.manage"
+              }
+            ],
+            "Sales": [
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.edit"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "incentives.view"
+              }
+            ],
+            "Manager": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.approve"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Get Permissions by Role",
+      "description": "Retrieve permissions for a specific role",
+      "url": "/roles/{roleName}/permissions",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "roleName",
+          "description": "Name of the role",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<IEnumerable<PermissionDto>>",
+        "example": {
+          "succeeded": true,
+          "message": "Role permissions retrieved successfully",
+          "data": [
+            {
+              "claimType": "permission",
+              "claimValue": "deals.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.create"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.edit"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "incentives.view"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get User Permissions",
+      "description": "Retrieve all permissions for a specific user (combined from all assigned roles and direct permissions)",
+      "url": "/users/{userId}/permissions",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "userId",
+          "description": "ID of the user",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<UserPermissionsDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User permissions retrieved successfully",
+          "data": {
+            "userId": "user-123",
+            "userName": "johndoe",
+            "roles": ["Admin", "Sales"],
+            "rolePermissions": {
+              "Admin": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.create"
+                }
+              ],
+              "Sales": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.view"
+                },
+                {
+                  "claimType": "permission",
+                  "claimValue": "deals.create"
+                }
+              ]
+            },
+            "directPermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              }
+            ],
+            "effectivePermissions": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "users.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.view"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "deals.create"
+              },
+              {
+                "claimType": "permission",
+                "claimValue": "reports.approve"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Update Role Permissions",
+      "description": "Update permissions for a specific role",
+      "url": "/roles/{roleName}/permissions",
+      "method": "PUT",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "roleName",
+          "description": "Name of the role",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UpdateRolePermissionsDto",
+        "example": {
+          "permissions": [
+            {
+              "claimType": "permission",
+              "claimValue": "deals.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.create"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.edit"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "incentives.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "incentives.edit"
+            }
+          ]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<IEnumerable<PermissionDto>>",
+        "example": {
+          "succeeded": true,
+          "message": "Role permissions updated successfully",
+          "data": [
+            {
+              "claimType": "permission",
+              "claimValue": "deals.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.create"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "deals.edit"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "incentives.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "incentives.edit"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -41,7 +41,7 @@ namespace Incentive.Core.Entities
         public decimal PaidAmount { get; set; } = 0;
 
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal RemainingAmount { get; set; } 
+        public decimal RemainingAmount { get; set; } // This can be computed, but stored for query efficiency
 
         [Required]
         [StringLength(50)]
@@ -68,7 +68,7 @@ namespace Incentive.Core.Entities
         public DateTime? PaymentDueDate { get; set; } // When payment is due
 
         // Who closed the deal
-        public Guid? ClosedByUserId { get; set; }
+        public string? ClosedByUserId { get; set; }
 
         // Team attribution
         public Guid? TeamId { get; set; }
@@ -105,13 +105,16 @@ namespace Incentive.Core.Entities
 
         public int? RecurringFrequencyMonths { get; set; }
 
+        // User relationship (who created/owns the deal)
+        public new string? UserId { get; set; }
+
         // Payment tracking
-        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public virtual ICollection<Payment> Payments { get; set; } = [];
 
         // Deal activity history
-        public virtual ICollection<DealActivity> Activities { get; set; } = new List<DealActivity>();
+        public virtual ICollection<DealActivity> Activities { get; set; } = [];
 
         // Incentive earnings
-        public virtual ICollection<IncentiveEarning> IncentiveEarnings { get; set; } = new List<IncentiveEarning>();
+        public virtual ICollection<IncentiveEarning> IncentiveEarnings { get; set; } = [];
     }
 }

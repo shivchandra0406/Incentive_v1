@@ -68,9 +68,6 @@ namespace Incentive.Infrastructure.Identity
                 // Role permissions
                 ViewRoles, CreateRoles, EditRoles, DeleteRoles,
                 
-                // Tenant permissions
-                ViewTenants, CreateTenants, EditTenants, DeleteTenants,
-                
                 // IncentiveRule permissions
                 ViewIncentiveRules, CreateIncentiveRules, EditIncentiveRules, DeleteIncentiveRules,
                 
@@ -79,9 +76,6 @@ namespace Incentive.Infrastructure.Identity
                 
                 // Payment permissions
                 ViewPayments, CreatePayments, EditPayments, DeletePayments,
-                
-                // DealActivity permissions
-                ViewDealActivities, CreateDealActivities, EditDealActivities, DeleteDealActivities,
                 
                 // IncentiveEarning permissions
                 ViewIncentiveEarnings, CreateIncentiveEarnings, EditIncentiveEarnings, DeleteIncentiveEarnings

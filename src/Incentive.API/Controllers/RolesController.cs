@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Incentive.Application.Common.Models;
 using Incentive.Application.DTOs;
 using Incentive.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -234,6 +235,66 @@ namespace Incentive.API.Controllers
             {
                 _logger.LogError(ex, "Error getting roles for user with ID {UserId}", userId);
                 return StatusCode(500, "An error occurred while retrieving the user's roles");
+            }
+        }
+
+        [HttpPost("with-claims")]
+        public async Task<ActionResult<BaseResponse<RoleWithClaimsDto>>> CreateRoleWithClaims(CreateRoleWithClaimsDto createDto)
+        {
+            try
+            {
+                var tenantId = _tenantService.GetCurrentTenantId();
+
+                // Convert PermissionDto to Claims
+                var claims = createDto.Permissions.Select(p => new System.Security.Claims.Claim("Permission", p.ClaimValue)).ToList();
+
+                var result = await _identityService.CreateRoleWithClaimsAsync(
+                    createDto.Name,
+                    createDto.Description,
+                    tenantId,
+                    claims);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(BaseResponse<RoleWithClaimsDto>.Failure(result.Message));
+                }
+
+                // Get the created role
+                var role = await _identityService.GetRoleByIdAsync(result.RoleId);
+
+                // Get the role claims
+                var roleClaims = await _identityService.GetRoleClaimsAsync(result.RoleId);
+
+                // Map to permission DTOs
+                var permissionDtos = roleClaims
+                    .Where(c => c.Type == "Permission")
+                    .Select(c => new PermissionDto
+                    {
+                        ClaimType = c.Type,
+                        ClaimValue = c.Value
+                    })
+                    .ToList();
+
+                // Create response DTO
+                var responseDto = new RoleWithClaimsDto
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    Description = role.Description,
+                    TenantId = role.TenantId,
+                    Permissions = permissionDtos,
+                    CreatedAt = role.CreatedAt,
+                    CreatedBy = role.CreatedBy,
+                    LastModifiedAt = role.LastModifiedAt,
+                    LastModifiedBy = role.LastModifiedBy
+                };
+
+                return Ok(BaseResponse<RoleWithClaimsDto>.Success(responseDto, "Role created successfully with claims"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating role with claims");
+                return StatusCode(500, BaseResponse<RoleWithClaimsDto>.Failure("An error occurred while creating the role with claims"));
             }
         }
     }

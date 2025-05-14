@@ -1,0 +1,393 @@
+{
+  "title": "Incentive Management System API Documentation",
+  "version": "1.0.0",
+  "description": "Comprehensive API documentation for the Incentive Management System",
+  "baseUrl": "/api",
+  "authentication": {
+    "type": "JWT Bearer Token",
+    "description": "Most endpoints require authentication using a JWT Bearer token. The token can be obtained by calling the /auth/login endpoint.",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {token}"
+  },
+  "multiTenancy": {
+    "description": "The API supports multi-tenancy. All requests must include a tenant ID in the header.",
+    "headerName": "X-Tenant-Id",
+    "headerFormat": "{tenantId}"
+  },
+  "standardResponses": {
+    "success": {
+      "description": "Standard success response format",
+      "example": {
+        "succeeded": true,
+        "message": "Operation completed successfully",
+        "data": {}
+      }
+    },
+    "error": {
+      "description": "Standard error response format",
+      "example": {
+        "succeeded": false,
+        "message": "An error occurred",
+        "errors": ["Error detail 1", "Error detail 2"]
+      }
+    }
+  },
+  "modules": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for user authentication and registration",
+      "documentationFile": "auth-api.json",
+      "endpoints": [
+        {
+          "name": "Login",
+          "method": "POST",
+          "url": "/auth/login"
+        },
+        {
+          "name": "Register",
+          "method": "POST",
+          "url": "/auth/register"
+        },
+        {
+          "name": "Refresh Token",
+          "method": "POST",
+          "url": "/auth/refresh-token"
+        },
+        {
+          "name": "Validate Token",
+          "method": "POST",
+          "url": "/auth/validate-token"
+        },
+        {
+          "name": "Get Current User",
+          "method": "GET",
+          "url": "/auth/me"
+        }
+      ]
+    },
+    {
+      "name": "Role Permissions",
+      "description": "Endpoints for managing role-based permissions",
+      "documentationFile": "role-permissions-api.json",
+      "endpoints": [
+        {
+          "name": "Get All Role Permissions",
+          "method": "GET",
+          "url": "/roles/permissions"
+        },
+        {
+          "name": "Get Permissions by Role",
+          "method": "GET",
+          "url": "/roles/{roleName}/permissions"
+        },
+        {
+          "name": "Get User Permissions",
+          "method": "GET",
+          "url": "/users/{userId}/permissions"
+        },
+        {
+          "name": "Update Role Permissions",
+          "method": "PUT",
+          "url": "/roles/{roleName}/permissions"
+        }
+      ]
+    },
+    {
+      "name": "User Permissions",
+      "description": "Endpoints for managing user-specific permissions",
+      "documentationFile": "user-permissions-api.json",
+      "endpoints": [
+        {
+          "name": "Assign Permissions to User",
+          "method": "POST",
+          "url": "/users/{userId}/direct-permissions"
+        },
+        {
+          "name": "Update User Direct Permissions",
+          "method": "PUT",
+          "url": "/users/{userId}/direct-permissions"
+        },
+        {
+          "name": "Add User Direct Permission",
+          "method": "POST",
+          "url": "/users/{userId}/direct-permissions/add"
+        },
+        {
+          "name": "Remove User Direct Permission",
+          "method": "POST",
+          "url": "/users/{userId}/direct-permissions/remove"
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "Endpoints for managing users, user roles, and user claims",
+      "documentationFile": "user-management-api.json",
+      "endpoints": [
+        {
+          "name": "Get All Users",
+          "method": "GET",
+          "url": "/users"
+        },
+        {
+          "name": "Get User by ID",
+          "method": "GET",
+          "url": "/users/{id}"
+        },
+        {
+          "name": "Create User",
+          "method": "POST",
+          "url": "/users"
+        },
+        {
+          "name": "Update User",
+          "method": "PUT",
+          "url": "/users/{id}"
+        },
+        {
+          "name": "Delete User",
+          "method": "DELETE",
+          "url": "/users/{id}"
+        },
+        {
+          "name": "Get User Roles",
+          "method": "GET",
+          "url": "/users/{id}/roles"
+        },
+        {
+          "name": "Assign Roles to User",
+          "method": "POST",
+          "url": "/users/{id}/roles"
+        },
+        {
+          "name": "Change Password",
+          "method": "POST",
+          "url": "/users/change-password"
+        },
+        {
+          "name": "Reset Password",
+          "method": "POST",
+          "url": "/users/reset-password"
+        },
+        {
+          "name": "Get User Claims",
+          "method": "GET",
+          "url": "/users/{id}/claims"
+        },
+        {
+          "name": "Update User Claims",
+          "method": "POST",
+          "url": "/users/{id}/claims"
+        },
+        {
+          "name": "Add User Claim",
+          "method": "POST",
+          "url": "/users/{id}/claims/add"
+        },
+        {
+          "name": "Remove User Claim",
+          "method": "POST",
+          "url": "/users/{id}/claims/remove"
+        }
+      ]
+    },
+    {
+      "name": "Comprehensive User Management",
+      "description": "Endpoints for managing users with their roles and permissions in a single operation",
+      "documentationFile": "comprehensive-user-management-api.json",
+      "endpoints": [
+        {
+          "name": "Create User with Roles and Permissions",
+          "method": "POST",
+          "url": "/users/comprehensive"
+        },
+        {
+          "name": "Update User with Roles and Permissions",
+          "method": "PUT",
+          "url": "/users/{id}/comprehensive"
+        },
+        {
+          "name": "Get Comprehensive User Details",
+          "method": "GET",
+          "url": "/users/{id}/comprehensive"
+        }
+      ]
+    },
+    {
+      "name": "Role Management",
+      "description": "Endpoints for managing roles and role claims",
+      "documentationFile": "role-management-api.json",
+      "endpoints": [
+        {
+          "name": "Get All Roles",
+          "method": "GET",
+          "url": "/roles"
+        },
+        {
+          "name": "Get Role by ID",
+          "method": "GET",
+          "url": "/roles/{id}"
+        },
+        {
+          "name": "Create Role",
+          "method": "POST",
+          "url": "/roles"
+        },
+        {
+          "name": "Update Role",
+          "method": "PUT",
+          "url": "/roles/{id}"
+        },
+        {
+          "name": "Delete Role",
+          "method": "DELETE",
+          "url": "/roles/{id}"
+        },
+        {
+          "name": "Assign Role to User",
+          "method": "POST",
+          "url": "/roles/assign"
+        },
+        {
+          "name": "Get Role Claims",
+          "method": "GET",
+          "url": "/roleclaims/{roleId}"
+        },
+        {
+          "name": "Add Claim to Role",
+          "method": "POST",
+          "url": "/roleclaims"
+        }
+      ]
+    }
+  ],
+  "dataModels": {
+    "permissions": {
+      "PermissionDto": {
+        "claimType": "string",
+        "claimValue": "string"
+      },
+      "UserPermissionsDto": {
+        "userId": "string",
+        "userName": "string",
+        "roles": "string[]",
+        "rolePermissions": "Dictionary<string, PermissionDto[]>",
+        "directPermissions": "PermissionDto[]",
+        "effectivePermissions": "PermissionDto[]"
+      },
+      "UpdateRolePermissionsDto": {
+        "permissions": "PermissionDto[]"
+      },
+      "AssignUserPermissionsDto": {
+        "permissions": "PermissionDto[]"
+      },
+      "UpdateUserPermissionsDto": {
+        "permissions": "PermissionDto[]"
+      }
+    },
+    "user": {
+      "UserDto": {
+        "id": "string",
+        "userName": "string",
+        "email": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "tenantId": "string",
+        "isActive": "boolean",
+        "createdAt": "datetime",
+        "createdBy": "string",
+        "lastModifiedAt": "datetime",
+        "lastModifiedBy": "string",
+        "roles": "string[]",
+        "claims": "RoleClaimDto[]"
+      },
+      "CreateUserDto": {
+        "userName": "string",
+        "email": "string",
+        "password": "string",
+        "confirmPassword": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "tenantId": "string",
+        "isActive": "boolean",
+        "roles": "string[]"
+      },
+      "UpdateUserDto": {
+        "email": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "isActive": "boolean"
+      },
+      "CreateComprehensiveUserDto": {
+        "userDetails": {
+          "userName": "string",
+          "email": "string",
+          "password": "string",
+          "confirmPassword": "string",
+          "firstName": "string",
+          "lastName": "string",
+          "tenantId": "string",
+          "isActive": "boolean"
+        },
+        "roles": "string[]",
+        "directPermissions": "RoleClaimDto[]"
+      },
+      "UpdateComprehensiveUserDto": {
+        "userDetails": {
+          "email": "string",
+          "firstName": "string",
+          "lastName": "string",
+          "isActive": "boolean"
+        },
+        "roles": {
+          "add": "string[]",
+          "remove": "string[]"
+        },
+        "directPermissions": {
+          "add": "RoleClaimDto[]",
+          "remove": "RoleClaimDto[]"
+        }
+      },
+      "ComprehensiveUserResponseDto": {
+        "userId": "string",
+        "userName": "string",
+        "email": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "tenantId": "string",
+        "isActive": "boolean",
+        "roles": "string[]",
+        "permissions": "RoleClaimDto[]",
+        "createdAt": "datetime",
+        "createdBy": "string",
+        "lastModifiedAt": "datetime",
+        "lastModifiedBy": "string"
+      }
+    },
+    "role": {
+      "RoleDto": {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "tenantId": "string",
+        "createdAt": "datetime",
+        "createdBy": "string",
+        "lastModifiedAt": "datetime",
+        "lastModifiedBy": "string"
+      },
+      "CreateRoleDto": {
+        "name": "string",
+        "description": "string"
+      },
+      "UpdateRoleDto": {
+        "name": "string",
+        "description": "string"
+      },
+      "RoleClaimDto": {
+        "roleId": "string",
+        "claimType": "string",
+        "claimValue": "string"
+      }
+    }
+  }
+}

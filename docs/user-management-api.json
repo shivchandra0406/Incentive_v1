@@ -1,0 +1,458 @@
+{
+  "apiName": "User Management API",
+  "description": "API endpoints for managing users, roles, and claims in the Incentive Management System",
+  "baseUrl": "/api",
+  "headers": {
+    "required": [
+      {
+        "name": "Authorization",
+        "description": "Bearer token for authentication",
+        "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      {
+        "name": "tenantId",
+        "description": "Tenant identifier",
+        "example": "tenant-123"
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Get All Users",
+      "description": "Retrieve all users for the current tenant",
+      "url": "/users",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "response": {
+        "type": "BaseResponse<IEnumerable<UserDto>>",
+        "example": {
+          "succeeded": true,
+          "message": "Users retrieved successfully",
+          "data": [
+            {
+              "id": "user-123",
+              "userName": "johndoe",
+              "email": "john.doe@example.com",
+              "firstName": "John",
+              "lastName": "Doe",
+              "tenantId": "tenant-123",
+              "isActive": true,
+              "createdAt": "2023-01-01T00:00:00Z",
+              "createdBy": "system",
+              "lastModifiedAt": "2023-01-01T00:00:00Z",
+              "lastModifiedBy": "system",
+              "roles": ["Admin"],
+              "claims": [
+                {
+                  "claimType": "permission",
+                  "claimValue": "users.view"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get User by ID",
+      "description": "Retrieve a specific user by ID",
+      "url": "/users/{id}",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<UserDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User retrieved successfully",
+          "data": {
+            "id": "user-123",
+            "userName": "johndoe",
+            "email": "john.doe@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "tenantId": "tenant-123",
+            "isActive": true,
+            "createdAt": "2023-01-01T00:00:00Z",
+            "createdBy": "system",
+            "lastModifiedAt": "2023-01-01T00:00:00Z",
+            "lastModifiedBy": "system",
+            "roles": ["Admin"],
+            "claims": [
+              {
+                "claimType": "permission",
+                "claimValue": "users.view"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Create User",
+      "description": "Create a new user",
+      "url": "/users",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "CreateUserDto",
+        "example": {
+          "userName": "johndoe",
+          "email": "john.doe@example.com",
+          "password": "Password123!",
+          "confirmPassword": "Password123!",
+          "firstName": "John",
+          "lastName": "Doe",
+          "tenantId": "tenant-123",
+          "isActive": true,
+          "roles": ["Admin"]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User created successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "User created successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Update User",
+      "description": "Update an existing user",
+      "url": "/users/{id}",
+      "method": "PUT",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UpdateUserDto",
+        "example": {
+          "email": "john.updated@example.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "isActive": true
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User updated successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "User updated successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Delete User",
+      "description": "Delete a user",
+      "url": "/users/{id}",
+      "method": "DELETE",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User deleted successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "User deleted successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Get User Roles",
+      "description": "Get roles assigned to a user",
+      "url": "/users/{id}/roles",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<IEnumerable<string>>",
+        "example": {
+          "succeeded": true,
+          "message": "User roles retrieved successfully",
+          "data": ["Admin", "User"]
+        }
+      }
+    },
+    {
+      "name": "Assign Roles to User",
+      "description": "Assign roles to a user",
+      "url": "/users/{id}/roles",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UserRolesDto",
+        "example": {
+          "userId": "user-123",
+          "roles": ["Admin", "User"]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Roles assigned successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "Roles assigned successfully"
+          }
+        }
+      }
+    }
+  ],
+  "passwordManagement": [
+    {
+      "name": "Change Password",
+      "description": "Change a user's password (requires current password)",
+      "url": "/users/change-password",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "ChangePasswordDto",
+        "example": {
+          "userId": "user-123",
+          "currentPassword": "OldPassword123!",
+          "newPassword": "NewPassword123!",
+          "confirmNewPassword": "NewPassword123!"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Password changed successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "Password changed successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Reset Password",
+      "description": "Reset a user's password (admin only, doesn't require current password)",
+      "url": "/users/reset-password",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "requestBody": {
+        "type": "ResetPasswordDto",
+        "example": {
+          "userId": "user-123",
+          "newPassword": "NewPassword123!",
+          "confirmNewPassword": "NewPassword123!"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Password reset successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "Password reset successfully"
+          }
+        }
+      }
+    }
+  ],
+  "userClaims": [
+    {
+      "name": "Get User Claims",
+      "description": "Get claims assigned to a user",
+      "url": "/users/{id}/claims",
+      "method": "GET",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "BaseResponse<IEnumerable<RoleClaimDto>>",
+        "example": {
+          "succeeded": true,
+          "message": "User claims retrieved successfully",
+          "data": [
+            {
+              "claimType": "permission",
+              "claimValue": "users.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "users.create"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update User Claims",
+      "description": "Update all claims for a user",
+      "url": "/users/{id}/claims",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "UserClaimsDto",
+        "example": {
+          "userId": "user-123",
+          "claims": [
+            {
+              "claimType": "permission",
+              "claimValue": "users.view"
+            },
+            {
+              "claimType": "permission",
+              "claimValue": "users.create"
+            }
+          ]
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "User claims updated successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "User claims updated successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Add User Claim",
+      "description": "Add a single claim to a user",
+      "url": "/users/{id}/claims/add",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "RoleClaimDto",
+        "example": {
+          "claimType": "permission",
+          "claimValue": "users.delete"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Claim added to user successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "Claim added to user successfully"
+          }
+        }
+      }
+    },
+    {
+      "name": "Remove User Claim",
+      "description": "Remove a single claim from a user",
+      "url": "/users/{id}/claims/remove",
+      "method": "POST",
+      "requiresAuth": true,
+      "requiredRoles": ["Admin"],
+      "urlParams": [
+        {
+          "name": "id",
+          "description": "User ID",
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "type": "RoleClaimDto",
+        "example": {
+          "claimType": "permission",
+          "claimValue": "users.delete"
+        }
+      },
+      "response": {
+        "type": "BaseResponse<UserResponseDto>",
+        "example": {
+          "succeeded": true,
+          "message": "Claim removed from user successfully",
+          "data": {
+            "succeeded": true,
+            "userId": "user-123",
+            "message": "Claim removed from user successfully"
+          }
+        }
+      }
+    }
+  ]
+}

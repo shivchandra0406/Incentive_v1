@@ -30,7 +30,7 @@ namespace Incentive.Infrastructure.Repositories
         public async Task<IReadOnlyList<Deal>> GetDealsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Deals
-                .Where(d => d.UserId == userId || d.ClosedByUserId == userId)
+                .Where(d => d.UserId == userId.ToString() || d.ClosedByUserId == userId.ToString())
                 .Include(d => d.Payments)
                 .Include(d => d.Activities)
                 .ToListAsync(cancellationToken);

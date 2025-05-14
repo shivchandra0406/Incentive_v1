@@ -29,7 +29,6 @@ namespace Incentive.Application.DTOs
 
     public class AuthResponseDto
     {
-        public bool Succeeded { get; set; }
         public string Token { get; set; }
         public string RefreshToken { get; set; }
         public DateTime Expiration { get; set; }
@@ -40,6 +39,5 @@ namespace Incentive.Application.DTOs
         public string LastName { get; set; }
         public List<string> Roles { get; set; }
         public string TenantId { get; set; }
-        public string Message { get; set; }
     }
 }

@@ -30,12 +30,12 @@ namespace Incentive.Infrastructure.MultiTenancy
         {
             try
             {
-                return await _dbContext.Tenants.FindAsync(Guid.Parse(tenantId));
+                return await _dbContext.Tenants.FindAsync(tenantId) ?? null!;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting tenant with ID {TenantId}", tenantId);
-                return null;
+                return null!;
             }
         }
 
@@ -48,7 +48,7 @@ namespace Incentive.Infrastructure.MultiTenancy
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all tenants");
-                return Enumerable.Empty<Tenant>();
+                return [];
             }
         }
 
@@ -74,7 +74,7 @@ namespace Incentive.Infrastructure.MultiTenancy
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating tenant with name {TenantName} and identifier {TenantIdentifier}", name, identifier);
-                return null;
+                return null!;
             }
         }
 

@@ -152,7 +152,7 @@ namespace Incentive.API.Controllers
 
             var payment = _mapper.Map<Payment>(createPaymentDto);
             var createdPayment = await _paymentRepository.AddAsync(payment);
-            
+
             // Update the deal's paid amount and remaining amount
             deal.PaidAmount += payment.Amount;
             deal.RemainingAmount = deal.TotalAmount - deal.PaidAmount;
@@ -164,11 +164,11 @@ namespace Incentive.API.Controllers
             {
                 deal.Status = DealStatus.FullyPaid;
                 deal.ClosedDate = DateTime.UtcNow;
-                deal.ClosedByUserId = GuidUserId;
+                deal.ClosedByUserId = userId;
             }
-            
+
             await _dealRepository.UpdateAsync(deal);
-            
+
             // Create an activity record for the payment
             var activity = new DealActivity
             {
@@ -178,9 +178,9 @@ namespace Incentive.API.Controllers
                 Notes = payment.Notes,
                 ActivityDate = DateTime.UtcNow
             };
-            
+
             await _dealActivityRepository.AddAsync(activity);
-            
+
             return CreatedAtAction(nameof(GetPaymentById), new { id = createdPayment.Id }, _mapper.Map<PaymentDto>(createdPayment));
         }
 
@@ -199,11 +199,11 @@ namespace Incentive.API.Controllers
 
             // Store the old amount to calculate the difference
             var oldAmount = payment.Amount;
-            
+
             _mapper.Map(updatePaymentDto, payment);
-            
+
             await _paymentRepository.UpdateAsync(payment);
-            
+
             // If the amount changed, update the deal's paid amount and remaining amount
             if (oldAmount != payment.Amount)
             {
@@ -213,7 +213,7 @@ namespace Incentive.API.Controllers
                     // Adjust the paid amount by the difference
                     deal.PaidAmount = deal.PaidAmount - oldAmount + payment.Amount;
                     deal.RemainingAmount = deal.TotalAmount - deal.PaidAmount;
-                    
+
 
                     // If the deal is fully paid, update its status
                     if (deal.RemainingAmount <= 0 && deal.Status != DealStatus.FullyPaid)
@@ -228,9 +228,9 @@ namespace Incentive.API.Controllers
                         deal.Status = DealStatus.New;
                         deal.ClosedDate = null;
                     }
-                    
+
                     await _dealRepository.UpdateAsync(deal);
-                    
+
                     // Create an activity record for the payment update
                     var activity = new DealActivity
                     {
@@ -239,11 +239,11 @@ namespace Incentive.API.Controllers
                         Description = $"Payment updated from {oldAmount} to {payment.Amount}",
                         ActivityDate = DateTime.UtcNow
                     };
-                    
+
                     await _dealActivityRepository.AddAsync(activity);
                 }
             }
-            
+
             return NoContent();
         }
 
@@ -262,25 +262,25 @@ namespace Incentive.API.Controllers
             // Store the payment amount and deal ID before deleting
             var amount = payment.Amount;
             var dealId = payment.DealId;
-            
+
             await _paymentRepository.SoftDeleteAsync(payment);
-            
+
             // Update the deal's paid amount and remaining amount
             var deal = await _dealRepository.GetByIdAsync(dealId);
             if (deal != null)
             {
                 deal.PaidAmount -= amount;
                 deal.RemainingAmount = deal.TotalAmount - deal.PaidAmount;
-                
+
                 // If the deal was fully paid but now has a remaining amount, update its status
                 if (deal.RemainingAmount > 0 && deal.Status == DealStatus.FullyPaid)
                 {
                     deal.Status = DealStatus.New;
                     deal.ClosedDate = null;
                 }
-                
+
                 await _dealRepository.UpdateAsync(deal);
-                
+
                 // Create an activity record for the payment deletion
                 var activity = new DealActivity
                 {
@@ -289,10 +289,10 @@ namespace Incentive.API.Controllers
                     Description = $"Payment of {amount} deleted",
                     ActivityDate = DateTime.UtcNow
                 };
-                
+
                 await _dealActivityRepository.AddAsync(activity);
             }
-            
+
             return NoContent();
         }
 
@@ -310,7 +310,7 @@ namespace Incentive.API.Controllers
 
             payment.IsVerified = true;
             await _paymentRepository.UpdateAsync(payment);
-            
+
             // Create an activity record for the payment verification
             var activity = new DealActivity
             {
@@ -319,9 +319,9 @@ namespace Incentive.API.Controllers
                 Description = $"Payment of {payment.Amount} verified",
                 ActivityDate = DateTime.UtcNow
             };
-            
+
             await _dealActivityRepository.AddAsync(activity);
-            
+
             return NoContent();
         }
     }

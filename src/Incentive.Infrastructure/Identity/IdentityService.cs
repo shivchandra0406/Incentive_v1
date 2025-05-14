@@ -5,8 +5,10 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Incentive.Application.DTOs;
 using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -193,15 +195,15 @@ namespace Incentive.Infrastructure.Identity
             return result.Succeeded;
         }
 
-        public async Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration)> LoginAsync(string userName, string password)
+        public async Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration,List<string>? userRoles, ApplicationUser? user)> LoginAsync(string userName, string password)
         {
             var user = await _userManager.FindByNameAsync(userName);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             {
-                return (false, string.Empty, string.Empty,DateTime.MinValue);
+                throw new UnauthorizedAccessException("Username and password are invalid");
             }
-
+            var userRoles = await _userManager.GetRolesAsync(user);
             var token = await GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
 
@@ -209,7 +211,7 @@ namespace Incentive.Infrastructure.Identity
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
 
-            return (true, token.Token, refreshToken, token.Expiration);
+            return (true, token.Token, refreshToken, token.Expiration,userRoles?.ToList(),user.Adapt<ApplicationUser>());
         }
 
         public async Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration)> RefreshTokenAsync(string token, string refreshToken)
@@ -306,6 +308,104 @@ namespace Incentive.Infrastructure.Identity
             return users.Select(MapToApplicationUser).ToList();
         }
 
+        public async Task<IList<ApplicationUser>> GetUsersByTenantIdAsync(string tenantId)
+        {
+            var users = await _userManager.Users
+                .Where(u => u.TenantId == tenantId)
+                .ToListAsync();
+
+            return users.Select(MapToApplicationUser).ToList();
+        }
+
+        public async Task<(bool Succeeded, string Message)> UpdateUserAsync(string userId, string email, string firstName, string lastName, bool? isActive)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return (false, "User not found");
+            }
+
+            if (!string.IsNullOrEmpty(email) && user.Email != email)
+            {
+                // Check if email is already in use
+                var existingUser = await _userManager.FindByEmailAsync(email);
+                if (existingUser != null && existingUser.Id != userId)
+                {
+                    return (false, "Email is already in use");
+                }
+
+                user.Email = email;
+                user.NormalizedEmail = _userManager.NormalizeEmail(email);
+            }
+
+            if (!string.IsNullOrEmpty(firstName))
+            {
+                user.FirstName = firstName;
+            }
+
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                user.LastName = lastName;
+            }
+
+            if (isActive.HasValue)
+            {
+                user.IsActive = isActive.Value;
+            }
+
+            user.LastModifiedAt = DateTime.UtcNow;
+            user.LastModifiedBy = "system";
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return (true, "User updated successfully");
+            }
+
+            return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task<(bool Succeeded, string Message)> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return (false, "User not found");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+            if (result.Succeeded)
+            {
+                return (true, "Password changed successfully");
+            }
+
+            return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task<(bool Succeeded, string Message)> ResetPasswordAsync(string userId, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return (false, "User not found");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded)
+            {
+                return (true, "Password reset successfully");
+            }
+
+            return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
         public async Task<(bool Succeeded, string RoleId, string Message)> CreateRoleAsync(string name, string description, string tenantId)
         {
             var role = new AppRole
@@ -325,6 +425,40 @@ namespace Incentive.Infrastructure.Identity
             }
 
             return (false, string.Empty, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task<(bool Succeeded, string RoleId, string Message)> CreateRoleWithClaimsAsync(string name, string description, string tenantId, IEnumerable<Claim> claims)
+        {
+            // Create the role first
+            var createRoleResult = await CreateRoleAsync(name, description, tenantId);
+
+            if (!createRoleResult.Succeeded)
+            {
+                return createRoleResult;
+            }
+
+            var roleId = createRoleResult.RoleId;
+            var role = await _roleManager.FindByIdAsync(roleId);
+
+            if (role == null)
+            {
+                return (false, string.Empty, "Role was created but could not be retrieved");
+            }
+
+            // Add claims to the role
+            foreach (var claim in claims)
+            {
+                var addClaimResult = await _roleManager.AddClaimAsync(role, claim);
+
+                if (!addClaimResult.Succeeded)
+                {
+                    // If adding claims fails, we should still return success for the role creation
+                    // but include a warning in the message
+                    return (true, roleId, $"Role created successfully but some claims could not be added: {string.Join(", ", addClaimResult.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            return (true, roleId, "Role created successfully with all claims");
         }
 
         public async Task<bool> UpdateRoleAsync(string roleId, string name, string description)
@@ -440,6 +574,75 @@ namespace Incentive.Infrastructure.Identity
             }
 
             return await _roleManager.GetClaimsAsync(role);
+        }
+
+        public async Task<bool> AddClaimToUserAsync(string userId, string claimType, string claimValue)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var claim = new Claim(claimType, claimValue);
+            var result = await _userManager.AddClaimAsync(user, claim);
+
+            return result.Succeeded;
+        }
+
+        public async Task<bool> RemoveClaimFromUserAsync(string userId, string claimType, string claimValue)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var claim = new Claim(claimType, claimValue);
+            var result = await _userManager.RemoveClaimAsync(user, claim);
+
+            return result.Succeeded;
+        }
+
+        public async Task<IList<Claim>> GetUserClaimsAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return new List<Claim>();
+            }
+
+            return await _userManager.GetClaimsAsync(user);
+        }
+
+        public async Task<bool> UpdateUserClaimsAsync(string userId, IEnumerable<Claim> claims)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            // Get current claims
+            var currentClaims = await _userManager.GetClaimsAsync(user);
+
+            // Remove all current claims
+            foreach (var claim in currentClaims)
+            {
+                await _userManager.RemoveClaimAsync(user, claim);
+            }
+
+            // Add new claims
+            foreach (var claim in claims)
+            {
+                await _userManager.AddClaimAsync(user, claim);
+            }
+
+            return true;
         }
 
         private async Task<(string Token, DateTime Expiration)> GenerateJwtToken(AppUser user)
@@ -560,6 +763,118 @@ namespace Incentive.Infrastructure.Identity
                 LastModifiedAt = role.LastModifiedAt,
                 LastModifiedBy = role.LastModifiedBy
             };
+        }
+
+        // Permission Management Implementation
+        public async Task<Dictionary<string, IList<Claim>>> GetAllRolePermissionsAsync()
+        {
+            var result = new Dictionary<string, IList<Claim>>();
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            foreach (var role in roles)
+            {
+                if (role.Name != null)
+                {
+                    var claims = await _roleManager.GetClaimsAsync(role);
+                    var permissionClaims = claims.Where(c => c.Type == "Permission").ToList();
+                    result.Add(role.Name, permissionClaims);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<IList<Claim>> GetRolePermissionsByNameAsync(string roleName)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                return new List<Claim>();
+            }
+
+            var claims = await _roleManager.GetClaimsAsync(role);
+            return claims.Where(c => c.Type == "Permission").ToList();
+        }
+
+        public async Task<bool> UpdateRolePermissionsAsync(string roleName, IEnumerable<Claim> permissions)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                return false;
+            }
+
+            // Get current permission claims
+            var currentClaims = await _roleManager.GetClaimsAsync(role);
+            var currentPermissionClaims = currentClaims.Where(c => c.Type == "Permission").ToList();
+
+            // Remove all current permission claims
+            foreach (var claim in currentPermissionClaims)
+            {
+                var result = await _roleManager.RemoveClaimAsync(role, claim);
+                if (!result.Succeeded)
+                {
+                    return false;
+                }
+            }
+
+            // Add new permission claims
+            foreach (var claim in permissions)
+            {
+                var newClaim = new Claim(claim.Type, claim.Value);
+                var result = await _roleManager.AddClaimAsync(role, newClaim);
+                if (!result.Succeeded)
+                {
+                    return false;
+                }
+            }
+
+            // Synchronize claims for all users in this role
+            if (role.Name != null)
+            {
+                await _userClaimManager.SynchronizeUsersInRoleAsync(role.Name);
+            }
+
+            return true;
+        }
+
+        public async Task<(IList<string> Roles, Dictionary<string, IList<Claim>> RolePermissions, IList<Claim> DirectPermissions)> GetUserPermissionsAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return (new List<string>(), new Dictionary<string, IList<Claim>>(), new List<Claim>());
+            }
+
+            // Get user roles
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Get permissions from each role
+            var rolePermissions = new Dictionary<string, IList<Claim>>();
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    var permissionClaims = roleClaims.Where(c => c.Type == "Permission").ToList();
+                    rolePermissions.Add(roleName, permissionClaims);
+                }
+            }
+
+            // Get direct user claims
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var directPermissions = userClaims.Where(c => c.Type == "Permission").ToList();
+
+            return (roles.ToList(), rolePermissions, directPermissions);
+        }
+
+        public List<string> GetDefaultPermission()
+        {
+            return Permissions.GetAllPermissions();
         }
     }
 }

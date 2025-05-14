@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Incentive.Core.Entities;
+using System.Security.Claims;
 
 namespace Incentive.Core.Interfaces
 {
@@ -16,11 +13,15 @@ namespace Incentive.Core.Interfaces
         Task<ApplicationUser> GetUserByIdAsync(string userId);
         Task<ApplicationUser> GetUserByEmailAsync(string email);
         Task<IList<ApplicationUser>> GetAllUsersAsync();
+        Task<IList<ApplicationUser>> GetUsersByTenantIdAsync(string tenantId);
+        Task<(bool Succeeded, string Message)> UpdateUserAsync(string userId, string email, string firstName, string lastName, bool? isActive);
+        Task<(bool Succeeded, string Message)> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+        Task<(bool Succeeded, string Message)> ResetPasswordAsync(string userId, string newPassword);
 
         // Authentication
         Task<bool> IsInRoleAsync(string userId, string role);
         Task<bool> AuthorizeAsync(string userId, string policyName);
-        Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration)> LoginAsync(string userName, string password);
+        Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration, List<string>? userRoles, ApplicationUser? user)> LoginAsync(string userName, string password);
         Task<(bool Succeeded, string Token, string RefreshToken, DateTime Expiration)> RefreshTokenAsync(string token, string refreshToken);
 
         // Role Management
@@ -28,6 +29,7 @@ namespace Incentive.Core.Interfaces
         Task<bool> RemoveUserFromRoleAsync(string userId, string role);
         Task<IList<string>> GetUserRolesAsync(string userId);
         Task<(bool Succeeded, string RoleId, string Message)> CreateRoleAsync(string name, string description, string tenantId);
+        Task<(bool Succeeded, string RoleId, string Message)> CreateRoleWithClaimsAsync(string name, string description, string tenantId, IEnumerable<Claim> claims);
         Task<bool> UpdateRoleAsync(string roleId, string name, string description);
         Task<bool> DeleteRoleAsync(string roleId);
         Task<ApplicationRole> GetRoleByIdAsync(string roleId);
@@ -38,5 +40,18 @@ namespace Incentive.Core.Interfaces
         Task<bool> AddClaimToRoleAsync(string roleId, string claimType, string claimValue);
         Task<bool> RemoveClaimFromRoleAsync(string roleId, string claimType, string claimValue);
         Task<IList<Claim>> GetRoleClaimsAsync(string roleId);
+
+        // User Claims Management
+        Task<bool> AddClaimToUserAsync(string userId, string claimType, string claimValue);
+        Task<bool> RemoveClaimFromUserAsync(string userId, string claimType, string claimValue);
+        Task<IList<Claim>> GetUserClaimsAsync(string userId);
+        Task<bool> UpdateUserClaimsAsync(string userId, IEnumerable<Claim> claims);
+
+        // Permission Management
+        Task<Dictionary<string, IList<Claim>>> GetAllRolePermissionsAsync();
+        Task<IList<Claim>> GetRolePermissionsByNameAsync(string roleName);
+        Task<bool> UpdateRolePermissionsAsync(string roleName, IEnumerable<Claim> permissions);
+        Task<(IList<string> Roles, Dictionary<string, IList<Claim>> RolePermissions, IList<Claim> DirectPermissions)> GetUserPermissionsAsync(string userId);
+        List<string> GetDefaultPermission();
     }
 }

@@ -1,5 +1,5 @@
-using Incentive.Core.Entities;
 using System.Security.Claims;
+using Incentive.Core.Entities;
 
 namespace Incentive.Core.Interfaces
 {

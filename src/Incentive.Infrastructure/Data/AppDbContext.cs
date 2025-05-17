@@ -1,5 +1,6 @@
 using Incentive.Core.Common;
 using Incentive.Core.Entities;
+using Incentive.Core.Entities.IncentivePlan;
 using Incentive.Infrastructure.Identity;
 using Incentive.Infrastructure.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
@@ -18,19 +19,33 @@ namespace Incentive.Infrastructure.Data
 
         public AppDbContext(
             DbContextOptions<AppDbContext> options,
-            ITenantProvider tenantProvider,
-            ICurrentUserService currentUserService) : base(options)
+            ITenantProvider tenantProvider = null,
+            ICurrentUserService currentUserService = null) : base(options)
         {
             _tenantProvider = tenantProvider;
             _currentUserService = currentUserService;
         }
 
         public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<Project> Projects { get; set; }
         public DbSet<IncentiveRule> IncentiveRules { get; set; }
         public DbSet<IncentiveEarning> IncentiveEarnings { get; set; }
         public DbSet<Deal> Deals { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<DealActivity> DealActivities { get; set; }
+
+        // Team entities
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamMember> TeamMembers { get; set; }
+
+        // Incentive Plan entities
+        public DbSet<IncentivePlanBase> IncentivePlans { get; set; }
+        public DbSet<TargetBasedIncentivePlan> TargetBasedIncentivePlans { get; set; }
+        public DbSet<RoleBasedIncentivePlan> RoleBasedIncentivePlans { get; set; }
+        public DbSet<ProjectBasedIncentivePlan> ProjectBasedIncentivePlans { get; set; }
+        public DbSet<KickerIncentivePlan> KickerIncentivePlans { get; set; }
+        public DbSet<TieredIncentivePlan> TieredIncentivePlans { get; set; }
+        public DbSet<TieredIncentiveTier> TieredIncentiveTiers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -57,34 +72,42 @@ namespace Incentive.Infrastructure.Data
             // Add global query filters for soft-deletable entities and multi-tenancy
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                // Skip derived types (important for TPH)
+                if (entityType.BaseType != null)
+                    continue;
+
+                var clrType = entityType.ClrType;
+                var parameter = Expression.Parameter(clrType, "e");
                 Expression finalExpression = null;
 
-                // Multi-tenancy
-                if (typeof(MultiTenantEntity).IsAssignableFrom(entityType.ClrType))
+                // Multi-tenancy filter
+                if (typeof(MultiTenantEntity).IsAssignableFrom(clrType))
                 {
-                    var tenantIdProperty = Expression.Property(parameter, "TenantId");
-                    var getCurrentTenantIdMethod = typeof(AppDbContext).GetMethod(nameof(GetCurrentTenantId));
-                    var getCurrentTenantIdCall = Expression.Call(Expression.Constant(this), getCurrentTenantIdMethod);
-                    var tenantIdComparison = Expression.Equal(tenantIdProperty, getCurrentTenantIdCall);
-                    finalExpression = tenantIdComparison;
+                    var tenantIdProperty = Expression.Property(parameter, nameof(MultiTenantEntity.TenantId));
+                    var getCurrentTenantIdMethod = typeof(AppDbContext).GetMethod(nameof(GetCurrentTenantId),
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                    if (getCurrentTenantIdMethod != null)
+                    {
+                        var tenantIdCall = Expression.Call(Expression.Constant(this), getCurrentTenantIdMethod);
+                        var tenantFilter = Expression.Equal(tenantIdProperty, tenantIdCall);
+                        finalExpression = tenantFilter;
+                    }
                 }
 
                 // Soft delete
-                if (typeof(SoftDeletableEntity).IsAssignableFrom(entityType.ClrType))
+                if (typeof(SoftDeletableEntity).IsAssignableFrom(clrType))
                 {
-                    var isDeletedProperty = Expression.Property(parameter, "IsDeleted");
+                    var isDeletedProperty = Expression.Property(parameter, nameof(SoftDeletableEntity.IsDeleted));
                     var notDeleted = Expression.Equal(isDeletedProperty, Expression.Constant(false));
-                    finalExpression = finalExpression != null
-                        ? Expression.AndAlso(finalExpression, notDeleted)
-                        : notDeleted;
-                }
+                    finalExpression = notDeleted;
 
-                // Apply combined filter if any
+                }
+                // Apply the combined filter
                 if (finalExpression != null)
                 {
                     var lambda = Expression.Lambda(finalExpression, parameter);
-                    builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                    builder.Entity(clrType).HasQueryFilter(lambda);
                 }
             }
 
@@ -96,7 +119,7 @@ namespace Incentive.Infrastructure.Data
         /// <returns>The current tenant ID.</returns>
         public string GetCurrentTenantId()
         {
-            return _tenantProvider.GetTenantId();
+            return _tenantProvider?.GetTenantId() ?? "00000000-0000-0000-0000-000000000000";
         }
 
         /// <summary>
@@ -131,12 +154,13 @@ namespace Incentive.Infrastructure.Data
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var tenantId = GetCurrentTenantId();
-            var userId = _currentUserService.GetUserId();
+            var userId = _currentUserService?.GetUserId() ?? "00000000-0000-0000-0000-000000000000";
             var now = DateTime.UtcNow;
             _ = Guid.TryParse(userId, out Guid GuidUserId);
 
             foreach (var entry in ChangeTracker.Entries())
             {
+                var count = ChangeTracker.Entries().Count();
                 ApplyAuditInfo(entry, now, GuidUserId);
                 ApplySoftDelete(entry, now, GuidUserId);
                 ApplyMultiTenancy(entry, tenantId);

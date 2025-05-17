@@ -57,7 +57,7 @@ namespace Incentive.Application.Services
 
             // Calculate incentive amount
             decimal amount = 0;
-            if (rule.Incentive == IncentiveCalculationType.Percentage)
+            if (rule.Incentive == IncentiveCalculationType.PercentageOnTarget)
             {
                 amount = deal.TotalAmount * (rule.Commission ?? 0) / 100;
             }

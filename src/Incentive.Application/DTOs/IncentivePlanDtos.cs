@@ -14,6 +14,7 @@ namespace Incentive.Application.DTOs
         public IncentivePlanType PlanType { get; set; }
         public PeriodType PeriodType { get; set; }
         public bool IsActive { get; set; }
+        public CurrencyType CurrencyType { get; set; }
         public string TenantId { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
@@ -34,6 +35,9 @@ namespace Incentive.Application.DTOs
         public PeriodType PeriodType { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        [Required]
+        public CurrencyType CurrencyType { get; set; } = CurrencyType.Rupees;
     }
 
     public class UpdateIncentivePlanBaseDto
@@ -46,6 +50,9 @@ namespace Incentive.Application.DTOs
         public PeriodType PeriodType { get; set; }
 
         public bool IsActive { get; set; }
+
+        [Required]
+        public CurrencyType CurrencyType { get; set; }
     }
     #endregion
 

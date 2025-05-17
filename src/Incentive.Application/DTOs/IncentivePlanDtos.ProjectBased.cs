@@ -22,11 +22,9 @@ namespace Incentive.Application.DTOs
         public MetricType MetricType { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue)]
         public decimal TargetValue { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue)]
         public decimal IncentiveValue { get; set; }
 
         [Required]

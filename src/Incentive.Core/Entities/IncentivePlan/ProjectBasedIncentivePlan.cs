@@ -32,6 +32,6 @@ namespace Incentive.Core.Entities.IncentivePlan
         public IncentiveCalculationType CalculationType { get; set; }
 
         [Required]
-        public bool IncentiveAfterExceedingTarget { get; set; } = true;
+        public bool IsCumulative { get; set; } = true;
     }
 }

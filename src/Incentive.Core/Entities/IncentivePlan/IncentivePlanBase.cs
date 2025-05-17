@@ -30,6 +30,12 @@ namespace Incentive.Core.Entities.IncentivePlan
         [Required]
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// The currency type for monetary values in this incentive plan
+        /// </summary>
+        [Required]
+        public CurrencyType CurrencyType { get; set; } = CurrencyType.Rupees;
+
         // Discriminator for EF Core TPH inheritance
         public string PlanDiscriminator { get; set; } = string.Empty;
     }

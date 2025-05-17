@@ -28,9 +28,6 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
                 .IsRequired()
                 .HasConversion<string>();
 
-            builder.Property(p => p.IncentiveAfterExceedingTarget)
-                .IsRequired();
-
             // Configure relationships
             builder.HasOne(p => p.Project)
                 .WithMany()

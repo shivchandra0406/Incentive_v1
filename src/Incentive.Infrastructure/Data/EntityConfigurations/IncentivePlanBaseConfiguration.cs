@@ -25,6 +25,10 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
             builder.Property(p => p.IsActive)
                 .IsRequired();
 
+            builder.Property(p => p.CurrencyType)
+                .IsRequired()
+                .HasConversion<string>();
+
             // Configure TPH inheritance
             builder.HasDiscriminator(p => p.PlanDiscriminator)
                 .HasValue<TargetBasedIncentivePlan>("TargetBased")

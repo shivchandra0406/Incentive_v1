@@ -29,8 +29,8 @@ namespace Incentive.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ClosedByUserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ClosedByUserId")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("timestamp with time zone");
@@ -159,8 +159,8 @@ namespace Incentive.Infrastructure.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -299,6 +299,133 @@ namespace Incentive.Infrastructure.Migrations
                     b.HasIndex("IncentiveRuleId");
 
                     b.ToTable("IncentiveEarnings", "IncentiveManagement");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PeriodType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlanDiscriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PlanType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IncentivePlans", "IncentiveManagement");
+
+                    b.HasDiscriminator<string>("PlanDiscriminator").HasValue("IncentivePlanBase");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.TieredIncentiveTier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CalculationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("FromValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("IncentiveValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TieredIncentivePlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ToValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TieredIncentivePlanId");
+
+                    b.ToTable("TieredIncentiveTiers", "IncentiveManagement");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.IncentiveRule", b =>
@@ -479,6 +606,244 @@ namespace Incentive.Infrastructure.Migrations
                     b.HasIndex("DealId");
 
                     b.ToTable("Payments", "IncentiveManagement");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AgentContact")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("AgentName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Amenities")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("Area")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Bathrooms")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Bedrooms")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateListed")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ImagesMedia")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ListingExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("MLSListingId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("OwnershipDetails")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PropertyType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("For Sale");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("YearBuilt")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Projects", "IncentiveManagement");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams", "IncentiveManagement");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.TeamMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("LeftDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("TeamMembers", "IncentiveManagement");
                 });
 
             modelBuilder.Entity("Incentive.Core.Entities.Tenant", b =>
@@ -770,6 +1135,228 @@ namespace Incentive.Infrastructure.Migrations
                     b.ToTable("UserTokens", "Identity");
                 });
 
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.KickerIncentivePlan", b =>
+                {
+                    b.HasBaseType("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase");
+
+                    b.Property<string>("AwardType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("AwardValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int>("ConsistencyMonths")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("GiftDescription")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("MetricType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasDiscriminator().HasValue("KickerBased");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.ProjectBasedIncentivePlan", b =>
+                {
+                    b.HasBaseType("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase");
+
+                    b.Property<string>("CalculationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IncentiveAfterExceedingTarget")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("IncentiveValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("MetricType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("IncentivePlans", "IncentiveManagement", t =>
+                        {
+                            t.Property("MetricType")
+                                .HasColumnName("ProjectBasedIncentivePlan_MetricType");
+
+                            t.Property("TargetValue")
+                                .HasColumnName("ProjectBasedIncentivePlan_TargetValue");
+                        });
+
+                    b.HasDiscriminator().HasValue("ProjectBased");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.RoleBasedIncentivePlan", b =>
+                {
+                    b.HasBaseType("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase");
+
+                    b.Property<string>("CalculationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IncentiveAfterExceedingTarget")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("IncentiveValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<bool>("IncludeSalaryInTarget")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsCumulative")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsTeamBased")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MetricType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal?>("SalaryPercentage")
+                        .HasColumnType("decimal(5, 2)");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("IncentivePlans", "IncentiveManagement", t =>
+                        {
+                            t.Property("CalculationType")
+                                .HasColumnName("RoleBasedIncentivePlan_CalculationType");
+
+                            t.Property("IncentiveAfterExceedingTarget")
+                                .HasColumnName("RoleBasedIncentivePlan_IncentiveAfterExceedingTarget");
+
+                            t.Property("IncentiveValue")
+                                .HasColumnName("RoleBasedIncentivePlan_IncentiveValue");
+
+                            t.Property("MetricType")
+                                .HasColumnName("RoleBasedIncentivePlan_MetricType");
+
+                            t.Property("TargetValue")
+                                .HasColumnName("RoleBasedIncentivePlan_TargetValue");
+                        });
+
+                    b.HasDiscriminator().HasValue("RoleBased");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.TargetBasedIncentivePlan", b =>
+                {
+                    b.HasBaseType("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase");
+
+                    b.Property<decimal?>("AdditionalIncentiveOnExceeding")
+                        .HasColumnType("decimal(5, 2)");
+
+                    b.Property<string>("CalculationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IncentiveAfterExceedingTarget")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("IncentiveValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<bool>("IncludeSalaryInTarget")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MetricType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("ProvideAdditionalIncentiveOnExceeding")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ProvideAdditionalIncentiveOnExceeding");
+
+                    b.Property<decimal?>("Salary")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.ToTable("IncentivePlans", "IncentiveManagement", t =>
+                        {
+                            t.Property("CalculationType")
+                                .HasColumnName("TargetBasedIncentivePlan_CalculationType");
+
+                            t.Property("IncentiveAfterExceedingTarget")
+                                .HasColumnName("TargetBasedIncentivePlan_IncentiveAfterExceedingTarget");
+
+                            t.Property("IncentiveValue")
+                                .HasColumnName("TargetBasedIncentivePlan_IncentiveValue");
+
+                            t.Property("IncludeSalaryInTarget")
+                                .HasColumnName("TargetBasedIncentivePlan_IncludeSalaryInTarget");
+
+                            t.Property("MetricType")
+                                .HasColumnName("TargetBasedIncentivePlan_MetricType");
+
+                            t.Property("TargetType")
+                                .HasColumnName("TargetBasedIncentivePlan_TargetType");
+
+                            t.Property("TargetValue")
+                                .HasColumnName("TargetBasedIncentivePlan_TargetValue");
+                        });
+
+                    b.HasDiscriminator().HasValue("TargetBased");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.TieredIncentivePlan", b =>
+                {
+                    b.HasBaseType("Incentive.Core.Entities.IncentivePlan.IncentivePlanBase");
+
+                    b.Property<string>("MetricType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.ToTable("IncentivePlans", "IncentiveManagement", t =>
+                        {
+                            t.Property("MetricType")
+                                .HasColumnName("TieredIncentivePlan_MetricType");
+                        });
+
+                    b.HasDiscriminator().HasValue("TieredBased");
+                });
+
             modelBuilder.Entity("Incentive.Core.Entities.Deal", b =>
                 {
                     b.HasOne("Incentive.Core.Entities.IncentiveRule", "AssignedRule")
@@ -810,6 +1397,17 @@ namespace Incentive.Infrastructure.Migrations
                     b.Navigation("IncentiveRule");
                 });
 
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.TieredIncentiveTier", b =>
+                {
+                    b.HasOne("Incentive.Core.Entities.IncentivePlan.TieredIncentivePlan", "TieredIncentivePlan")
+                        .WithMany("Tiers")
+                        .HasForeignKey("TieredIncentivePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TieredIncentivePlan");
+                });
+
             modelBuilder.Entity("Incentive.Core.Entities.Payment", b =>
                 {
                     b.HasOne("Incentive.Core.Entities.Deal", "Deal")
@@ -819,6 +1417,17 @@ namespace Incentive.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Deal");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.TeamMember", b =>
+                {
+                    b.HasOne("Incentive.Core.Entities.Team", "Team")
+                        .WithMany("Members")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -872,6 +1481,25 @@ namespace Incentive.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.ProjectBasedIncentivePlan", b =>
+                {
+                    b.HasOne("Incentive.Core.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.RoleBasedIncentivePlan", b =>
+                {
+                    b.HasOne("Incentive.Core.Entities.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Incentive.Core.Entities.Deal", b =>
                 {
                     b.Navigation("Activities");
@@ -886,6 +1514,16 @@ namespace Incentive.Infrastructure.Migrations
                     b.Navigation("Deals");
 
                     b.Navigation("IncentiveEarnings");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.Team", b =>
+                {
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Incentive.Core.Entities.IncentivePlan.TieredIncentivePlan", b =>
+                {
+                    b.Navigation("Tiers");
                 });
 #pragma warning restore 612, 618
         }

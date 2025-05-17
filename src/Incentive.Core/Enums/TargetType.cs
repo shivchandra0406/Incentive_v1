@@ -5,7 +5,7 @@ namespace Incentive.Core.Enums
     /// </summary>
     public enum TargetType
     {
-        ItemBased,
-        SalaryBased
+        SalaryBased,
+        MetricBased
     }
 }

@@ -1,0 +1,37 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Incentive.Infrastructure.Models;
+
+public partial class Team
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; } = null!;
+
+    public string Description { get; set; } = null!;
+
+    public bool IsActive { get; set; }
+
+    public Guid UserId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public Guid CreatedBy { get; set; }
+
+    public DateTime? LastModifiedAt { get; set; }
+
+    public Guid LastModifiedBy { get; set; }
+
+    public bool IsDeleted { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
+    public Guid? DeletedBy { get; set; }
+
+    public string TenantId { get; set; } = null!;
+
+    public virtual ICollection<IncentivePlan> IncentivePlans { get; set; } = new List<IncentivePlan>();
+
+    public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+}

@@ -1,4 +1,5 @@
 using Incentive.API.Swagger;
+using Incentive.Application;
 using Incentive.Application.Mappings;
 using Incentive.Infrastructure;
 using Microsoft.OpenApi.Models;
@@ -14,6 +15,7 @@ namespace Incentive.API.Extensions
             services.AddInfrastructure(configuration);
 
             // Add Application services
+            services.AddApplication();
             services.AddScoped<Incentive.Core.Interfaces.IAuthService, Incentive.Application.Services.AuthService>();
             services.AddScoped<Incentive.Core.Interfaces.IIncentiveService, Incentive.Application.Services.IncentiveService>();
 

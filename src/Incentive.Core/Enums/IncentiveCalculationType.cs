@@ -5,7 +5,8 @@ namespace Incentive.Core.Enums
     /// </summary>
     public enum IncentiveCalculationType
     {
-        Percentage,
-        FixedAmount
+        FixedAmount,
+        PercentageOnTarget,
+
     }
 }

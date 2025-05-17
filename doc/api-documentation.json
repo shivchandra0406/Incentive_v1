@@ -1,0 +1,227 @@
+{
+  "title": "Incentive Management System API Documentation",
+  "version": "1.0.0",
+  "description": "Documentation for the Incentive Management System API",
+  "modules": [
+    {
+      "name": "Authentication",
+      "description": "Authentication and user management endpoints",
+      "endpoints": [
+        {
+          "path": "/api/auth/login",
+          "method": "POST",
+          "description": "Authenticate a user and get JWT token",
+          "request": {
+            "contentType": "application/json",
+            "body": {
+              "userName": "string",
+              "password": "string"
+            }
+          },
+          "response": {
+            "contentType": "application/json",
+            "body": {
+              "token": "string",
+              "refreshToken": "string",
+              "userId": "string",
+              "userName": "string",
+              "email": "string",
+              "firstName": "string",
+              "lastName": "string",
+              "roles": ["string"],
+              "tenantId": "string"
+            }
+          }
+        },
+        {
+          "path": "/api/auth/register",
+          "method": "POST",
+          "description": "Register a new user",
+          "request": {
+            "contentType": "application/json",
+            "body": {
+              "userName": "string",
+              "email": "string",
+              "password": "string",
+              "confirmPassword": "string",
+              "firstName": "string",
+              "lastName": "string",
+              "tenantId": "string"
+            }
+          },
+          "response": {
+            "contentType": "application/json",
+            "body": {
+              "success": true,
+              "message": "User registered successfully"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "IncentivePlans",
+      "description": "Incentive plan management endpoints",
+      "endpoints": [
+        {
+          "path": "/api/incentiveplans",
+          "method": "GET",
+          "description": "Get all incentive plans",
+          "headers": {
+            "X-Tenant-Id": "string"
+          },
+          "response": {
+            "contentType": "application/json",
+            "body": [
+              {
+                "id": "guid",
+                "planName": "string",
+                "planType": "enum (Target, Role, Project, Kicker, Tiered)",
+                "periodType": "enum (Monthly, Quarterly, Yearly, Custom)",
+                "startDate": "date",
+                "endDate": "date",
+                "isActive": "boolean",
+                "tenantId": "string",
+                "createdAt": "date",
+                "createdBy": "string",
+                "lastModifiedAt": "date",
+                "lastModifiedBy": "string"
+              }
+            ]
+          }
+        },
+        {
+          "path": "/api/incentiveplans/target",
+          "method": "POST",
+          "description": "Create a target-based incentive plan",
+          "headers": {
+            "X-Tenant-Id": "string"
+          },
+          "request": {
+            "contentType": "application/json",
+            "body": {
+              "planName": "string",
+              "planType": "Target",
+              "periodType": "enum (Monthly, Quarterly, Yearly, Custom)",
+              "startDate": "date (required if periodType is Custom)",
+              "endDate": "date (required if periodType is Custom)",
+              "isActive": "boolean",
+              "targetType": "enum (SalaryBased, MetricBased)",
+              "salary": "decimal (required if targetType is SalaryBased)",
+              "metricType": "enum (Revenue, Profit, DealCount, etc.)",
+              "targetValue": "decimal",
+              "calculationType": "enum (Percentage, FixedAmount)",
+              "incentiveValue": "decimal",
+              "incentiveAfterExceedingTarget": "boolean",
+              "provideAdditionalIncentiveOnExceeding": "boolean",
+              "includeSalaryInTarget": "boolean"
+            }
+          },
+          "response": {
+            "contentType": "application/json",
+            "body": {
+              "id": "guid",
+              "planName": "string",
+              "planType": "Target",
+              "periodType": "enum (Monthly, Quarterly, Yearly, Custom)",
+              "startDate": "date",
+              "endDate": "date",
+              "isActive": "boolean",
+              "targetType": "enum (SalaryBased, MetricBased)",
+              "salary": "decimal",
+              "metricType": "enum (Revenue, Profit, DealCount, etc.)",
+              "targetValue": "decimal",
+              "calculationType": "enum (Percentage, FixedAmount)",
+              "incentiveValue": "decimal",
+              "incentiveAfterExceedingTarget": "boolean",
+              "provideAdditionalIncentiveOnExceeding": "boolean",
+              "includeSalaryInTarget": "boolean",
+              "tenantId": "string",
+              "createdAt": "date",
+              "createdBy": "string",
+              "lastModifiedAt": "date",
+              "lastModifiedBy": "string"
+            }
+          }
+        },
+        {
+          "path": "/api/incentiveplans/target/{id}",
+          "method": "PUT",
+          "description": "Update a target-based incentive plan",
+          "headers": {
+            "X-Tenant-Id": "string"
+          },
+          "request": {
+            "contentType": "application/json",
+            "body": {
+              "planName": "string",
+              "periodType": "enum (Monthly, Quarterly, Yearly, Custom)",
+              "startDate": "date (required if periodType is Custom)",
+              "endDate": "date (required if periodType is Custom)",
+              "isActive": "boolean",
+              "targetType": "enum (SalaryBased, MetricBased)",
+              "salary": "decimal (required if targetType is SalaryBased)",
+              "metricType": "enum (Revenue, Profit, DealCount, etc.)",
+              "targetValue": "decimal",
+              "calculationType": "enum (Percentage, FixedAmount)",
+              "incentiveValue": "decimal",
+              "incentiveAfterExceedingTarget": "boolean",
+              "provideAdditionalIncentiveOnExceeding": "boolean",
+              "includeSalaryInTarget": "boolean"
+            }
+          },
+          "response": {
+            "contentType": "application/json",
+            "body": {
+              "id": "guid",
+              "planName": "string",
+              "planType": "Target",
+              "periodType": "enum (Monthly, Quarterly, Yearly, Custom)",
+              "startDate": "date",
+              "endDate": "date",
+              "isActive": "boolean",
+              "targetType": "enum (SalaryBased, MetricBased)",
+              "salary": "decimal",
+              "metricType": "enum (Revenue, Profit, DealCount, etc.)",
+              "targetValue": "decimal",
+              "calculationType": "enum (Percentage, FixedAmount)",
+              "incentiveValue": "decimal",
+              "incentiveAfterExceedingTarget": "boolean",
+              "provideAdditionalIncentiveOnExceeding": "boolean",
+              "includeSalaryInTarget": "boolean",
+              "tenantId": "string",
+              "createdAt": "date",
+              "createdBy": "string",
+              "lastModifiedAt": "date",
+              "lastModifiedBy": "string"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "date": "2025-05-15",
+      "description": "Added Entity Configurations for Incentive Plan Types",
+      "details": [
+        "Created configuration files for RoleBasedIncentivePlan, ProjectBasedIncentivePlan, KickerIncentivePlan, and TieredIncentivePlan",
+        "Configured proper relationships between entities",
+        "Added proper column types and constraints",
+        "Configured enum conversions to use string representation in the database",
+        "Created migration 'AddIncentivePlanConfigurations' to apply these changes to the database",
+        "Note: The application uses Table-Per-Hierarchy (TPH) inheritance for incentive plans, so all incentive plan types are stored in a single table (IncentivePlans) with a discriminator column"
+      ]
+    },
+    {
+      "date": "2025-05-15",
+      "description": "Updated TargetBasedIncentivePlan entity",
+      "details": [
+        "Renamed SalaryPercentage to Salary for better clarity",
+        "Added ProvideAdditionalIncentiveOnExceeding field to control additional incentives when targets are exceeded",
+        "Updated DTOs to reflect these changes",
+        "Created migration 'UpdateTargetBasedIncentivePlan' to apply these changes to the database"
+      ]
+    }
+  ]
+}

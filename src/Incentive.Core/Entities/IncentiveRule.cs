@@ -64,9 +64,5 @@ namespace Incentive.Core.Entities
         public decimal? MaximumIncentiveAmount { get; set; }
 
         public Guid? TeamId { get; set; }
-
-        // Navigation properties
-        public virtual ICollection<IncentiveEarning> IncentiveEarnings { get; set; } = new List<IncentiveEarning>();
-        public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
     }
 }

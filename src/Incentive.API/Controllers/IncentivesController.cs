@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Incentive.Application.DTOs;
 using Incentive.Core.Interfaces;
+using Incentive.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,12 @@ namespace Incentive.API.Controllers
     public class IncentivesController : ControllerBase
     {
         private readonly IIncentiveService _incentiveService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public IncentivesController(IIncentiveService incentiveService)
+        public IncentivesController(IIncentiveService incentiveService,ICurrentUserService currentUserService)
         {
             _incentiveService = incentiveService;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost("calculate/{dealId}")]
@@ -26,20 +29,20 @@ namespace Incentive.API.Controllers
             try
             {
                 // Get the current user ID from the claims
-                var userId = User.Identity?.Name ?? User.FindFirst("sub")?.Value;
+                var userId = _currentUserService?.GetUserId() ?? "00000000-0000-0000-0000-000000000000";
+                _ = Guid.TryParse(userId, out Guid GuidUserId);
                 if (string.IsNullOrEmpty(userId))
                 {
                     return BadRequest("User ID could not be determined");
                 }
 
-                var incentiveEarning = await _incentiveService.CalculateIncentiveAsync(dealId, userId);
+                var incentiveEarning = await _incentiveService.CalculateIncentiveAsync(dealId, GuidUserId);
 
                 var incentiveDto = new IncentiveEarningDto
                 {
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -67,7 +70,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -95,7 +98,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -123,7 +126,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -139,7 +142,7 @@ namespace Incentive.API.Controllers
         }
 
         [HttpGet("by-user/{userId}")]
-        public async Task<IActionResult> GetByUser(string userId)
+        public async Task<IActionResult> GetByUser(Guid userId)
         {
             var incentiveEarnings = await _incentiveService.GetIncentiveEarningsByUserAsync(userId);
 
@@ -151,7 +154,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -175,7 +178,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),
@@ -199,7 +202,7 @@ namespace Incentive.API.Controllers
                     Id = incentiveEarning.Id,
                     DealId = incentiveEarning.DealId,
                     UserId = incentiveEarning.UserId,
-                    IncentiveRuleId = incentiveEarning.IncentiveRuleId,
+                    IncnetivePlanId = incentiveEarning.IncentivePlanId,
                     Amount = incentiveEarning.Amount,
                     EarningDate = incentiveEarning.EarningDate,
                     Status = incentiveEarning.Status.ToString(),

@@ -59,12 +59,6 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
                 .HasDefaultValue(true);
 
             // No Project relationship
-
-            // Configure relationship with Deal
-            builder.HasMany(r => r.Deals)
-                .WithOne(d => d.AssignedRule)
-                .HasForeignKey(d => d.IncentiveRuleId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

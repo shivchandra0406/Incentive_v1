@@ -17,7 +17,7 @@ namespace Incentive.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IncentiveEarning> CalculateIncentiveAsync(Guid dealId, string userId)
+        public async Task<IncentiveEarning> CalculateIncentiveAsync(Guid dealId, Guid userId)
         {
             var deal = await _unitOfWork.Repository<Deal>().GetByIdAsync(dealId);
             if (deal == null)
@@ -77,7 +77,7 @@ namespace Incentive.Application.Services
             {
                 DealId = dealId,
                 UserId = userId,
-                IncentiveRuleId = rule.Id,
+                IncentivePlanId = rule.Id,
                 Amount = amount,
                 EarningDate = DateTime.UtcNow,
                 Status = IncentiveEarningStatus.Pending
@@ -142,7 +142,7 @@ namespace Incentive.Application.Services
             return incentiveEarning;
         }
 
-        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByUserAsync(string userId)
+        public async Task<IEnumerable<IncentiveEarning>> GetIncentiveEarningsByUserAsync(Guid userId)
         {
             return await _unitOfWork.Repository<IncentiveEarning>().GetAsync(i => i.UserId == userId);
         }

@@ -148,7 +148,7 @@ namespace Incentive.Application.DTOs
         public decimal TotalAmount { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal RemainingAmount { get; set; }
-        public string CurrencyType { get; set; } = string.Empty;
+        public CurrencyType CurrencyType { get; set; }
         public decimal TaxPercentage { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal DiscountAmount { get; set; }
@@ -201,8 +201,7 @@ namespace Incentive.Application.DTOs
         public decimal TotalAmount { get; set; }
         
         [Required]
-        [StringLength(50)]
-        public string CurrencyType { get; set; } = string.Empty;
+        public CurrencyType CurrencyType { get; set; }
         
         [Range(0, 100)]
         public decimal TaxPercentage { get; set; } = 0;
@@ -271,8 +270,7 @@ namespace Incentive.Application.DTOs
         public decimal TotalAmount { get; set; }
         
         [Required]
-        [StringLength(50)]
-        public string CurrencyType { get; set; } = string.Empty;
+        public CurrencyType CurrencyType { get; set; }
         
         [Range(0, 100)]
         public decimal TaxPercentage { get; set; }

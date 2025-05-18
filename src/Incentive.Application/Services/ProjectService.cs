@@ -56,8 +56,7 @@ namespace Incentive.Application.Services
                     p.Location.Contains(searchTerm) ||
                     p.PropertyType.Contains(searchTerm) ||
                     p.Status.Contains(searchTerm) ||
-                    p.AgentName.Contains(searchTerm) ||
-                    p.MLSListingId.Contains(searchTerm));
+                    p.AgentName.Contains(searchTerm));
             }
 
             var totalCount = await query.CountAsync();

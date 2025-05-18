@@ -48,12 +48,6 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
             builder.Property(p => p.Amenities)
                 .HasMaxLength(500);
 
-            builder.Property(p => p.OwnershipDetails)
-                .HasMaxLength(50);
-
-            builder.Property(p => p.MLSListingId)
-                .HasMaxLength(50);
-
             builder.Property(p => p.TotalValue)
                 .HasColumnType("decimal(18,2)");
 

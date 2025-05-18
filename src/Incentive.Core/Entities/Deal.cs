@@ -46,7 +46,7 @@ namespace Incentive.Core.Entities
 
         [Required]
         [StringLength(50)]
-        public string CurrencyType { get; set; } = string.Empty; // Currency used for this deal
+        public CurrencyType CurrencyType { get; set; } 
 
         [Column(TypeName = "decimal(5, 2)")]
         public decimal TaxPercentage { get; set; } = 0;

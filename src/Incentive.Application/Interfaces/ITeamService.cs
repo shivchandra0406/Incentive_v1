@@ -12,10 +12,16 @@ namespace Incentive.Application.Interfaces
         Task<TeamDto> CreateTeamAsync(CreateTeamDto createTeamDto);
         Task<TeamDto> UpdateTeamAsync(Guid id, UpdateTeamDto updateTeamDto);
         Task<bool> DeleteTeamAsync(Guid id);
-        
+
         Task<List<TeamMemberDto>> GetTeamMembersAsync(Guid teamId);
         Task<TeamMemberDto> AddTeamMemberAsync(AddTeamMemberDto addTeamMemberDto);
         Task<TeamMemberDto> UpdateTeamMemberAsync(Guid id, UpdateTeamMemberDto updateTeamMemberDto);
         Task<bool> RemoveTeamMemberAsync(Guid id);
+
+        /// <summary>
+        /// Gets a list of teams with minimal data (ID and Name only)
+        /// </summary>
+        /// <returns>List of teams with minimal data</returns>
+        Task<IEnumerable<TeamMinimalDto>> GetTeamsMinimalAsync();
     }
 }

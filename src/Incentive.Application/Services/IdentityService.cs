@@ -2,6 +2,9 @@ using Incentive.Application.Interfaces;
 using Incentive.Core.Entities;
 using Incentive.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Incentive.Application.DTOs;
+using System.Collections.Generic;
 
 namespace Incentive.Application.Services
 {
@@ -34,6 +37,21 @@ namespace Incentive.Application.Services
                 LastModifiedAt = appUser.LastModifiedAt,
                 LastModifiedBy = appUser.LastModifiedBy
             };
+        }
+
+        public async Task<IEnumerable<UserMinimalDto>> GetUsersMinimalAsync()
+        {
+            var users = await _userManager.Users
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.UserName)
+                .Select(u => new UserMinimalDto
+                {
+                    Id = u.Id,
+                    Name = $"{u.FirstName} {u.LastName}"
+                })
+                .ToListAsync();
+
+            return users;
         }
     }
 }

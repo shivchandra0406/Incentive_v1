@@ -2,6 +2,7 @@ using Incentive.API.Attributes;
 using Incentive.Application.Common.Models;
 using Incentive.Application.DTOs;
 using Incentive.Core.Interfaces;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,6 +70,26 @@ namespace Incentive.API.Controllers
             {
                 _logger.LogError(ex, "Error retrieving users");
                 return StatusCode(500, BaseResponse<IEnumerable<UserDto>>.Failure("An error occurred while retrieving users"));
+            }
+        }
+
+        /// <summary>
+        /// Get minimal user data (ID and Name only)
+        /// </summary>
+        /// <returns>List of users with minimal data</returns>
+        [HttpGet("minimal")]
+        [ProducesResponseType(typeof(BaseResponse<IEnumerable<UserMinimalDto>>), 200)]
+        public async Task<ActionResult<BaseResponse<IEnumerable<UserMinimalDto>>>> GetUsersMinimal()
+        {
+            try
+            {
+                var users = await _identityService.GetUsersMinimalAsync();
+                return Ok(BaseResponse<IEnumerable<UserMinimalDto>>.Success(users.Adapt<List<UserMinimalDto>>(), "Minimal user data retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving minimal user data");
+                return StatusCode(500, BaseResponse<IEnumerable<UserMinimalDto>>.Failure("An error occurred while retrieving minimal user data"));
             }
         }
 

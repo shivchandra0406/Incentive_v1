@@ -4,6 +4,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Incentive.Application.DTOs
 {
+    /// <summary>
+    /// Minimal user data containing only ID and Name
+    /// </summary>
+    public class UserMinimalDto
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
     public class UserDto
     {
         public string Id { get; set; }

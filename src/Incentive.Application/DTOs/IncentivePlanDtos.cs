@@ -6,6 +6,15 @@ using Incentive.Core.Enums;
 
 namespace Incentive.Application.DTOs
 {
+    /// <summary>
+    /// Minimal incentive plan data containing only ID and Name
+    /// </summary>
+    public class IncentivePlanMinimalDto
+    {
+        public Guid Id { get; set; }
+        public string PlanName { get; set; }
+    }
+
     #region Base DTOs
     public class IncentivePlanBaseDto
     {
@@ -16,6 +25,11 @@ namespace Incentive.Application.DTOs
         public bool IsActive { get; set; }
         public CurrencyType CurrencyType { get; set; }
         public string TenantId { get; set; }
+        // If PeriodType == Custom
+        public DateTime? StartDate { get; set; }
+
+        // If PeriodType == Custom
+        public DateTime? EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
         public DateTime? LastModifiedAt { get; set; }
@@ -38,6 +52,11 @@ namespace Incentive.Application.DTOs
 
         [Required]
         public CurrencyType CurrencyType { get; set; } = CurrencyType.Rupees;
+        // If PeriodType == Custom
+        public DateTime? StartDate { get; set; }
+
+        // If PeriodType == Custom
+        public DateTime? EndDate { get; set; }
     }
 
     public class UpdateIncentivePlanBaseDto
@@ -53,6 +72,11 @@ namespace Incentive.Application.DTOs
 
         [Required]
         public CurrencyType CurrencyType { get; set; }
+        // If PeriodType == Custom
+        public DateTime? StartDate { get; set; }
+
+        // If PeriodType == Custom
+        public DateTime? EndDate { get; set; }
     }
     #endregion
 
@@ -69,6 +93,13 @@ namespace Incentive.Application.DTOs
         [Column("ProvideAdditionalIncentiveOnExceeding")]
         public bool ProvideAdditionalIncentiveOnExceeding { get; set; }
         public bool IncludeSalaryInTarget { get; set; }
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal? AdditionalIncentiveOnExceeding { get; set; }
+        // If PeriodType == Custom
+        public DateTime? StartDate { get; set; }
+
+        // If PeriodType == Custom
+        public DateTime? EndDate { get; set; }
     }
 
     public class CreateTargetBasedIncentivePlanDto : CreateIncentivePlanBaseDto
@@ -94,6 +125,8 @@ namespace Incentive.Application.DTOs
         public bool IncentiveAfterExceedingTarget { get; set; } = true;
         public bool ProvideAdditionalIncentiveOnExceeding { get; set; } = false;
         public bool IncludeSalaryInTarget { get; set; } = false;
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal? AdditionalIncentiveOnExceeding { get; set; }
     }
 
     public class UpdateTargetBasedIncentivePlanDto : UpdateIncentivePlanBaseDto
@@ -119,6 +152,8 @@ namespace Incentive.Application.DTOs
         public bool IncentiveAfterExceedingTarget { get; set; }
         public bool ProvideAdditionalIncentiveOnExceeding { get; set; }
         public bool IncludeSalaryInTarget { get; set; }
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal? AdditionalIncentiveOnExceeding { get; set; }
     }
     #endregion
 }

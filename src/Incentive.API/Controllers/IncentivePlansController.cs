@@ -42,6 +42,26 @@ namespace Incentive.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Get minimal incentive plan data (ID and Name only)
+        /// </summary>
+        /// <returns>List of incentive plans with minimal data</returns>
+        [HttpGet("minimal")]
+        [ProducesResponseType(typeof(BaseResponse<IEnumerable<IncentivePlanMinimalDto>>), 200)]
+        public async Task<ActionResult<BaseResponse<IEnumerable<IncentivePlanMinimalDto>>>> GetIncentivePlansMinimal()
+        {
+            try
+            {
+                var plans = await _incentivePlanService.GetIncentivePlansMinimalAsync();
+                return Ok(BaseResponse<IEnumerable<IncentivePlanMinimalDto>>.Success(plans, "Minimal incentive plan data retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving minimal incentive plan data");
+                return StatusCode(500, BaseResponse<IEnumerable<IncentivePlanMinimalDto>>.Failure("An error occurred while retrieving minimal incentive plan data"));
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<BaseResponse<object>>> GetIncentivePlanById(Guid id)
         {

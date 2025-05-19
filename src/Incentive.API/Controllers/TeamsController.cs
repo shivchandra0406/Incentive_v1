@@ -41,6 +41,26 @@ namespace Incentive.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Get minimal team data (ID and Name only)
+        /// </summary>
+        /// <returns>List of teams with minimal data</returns>
+        [HttpGet("minimal")]
+        [ProducesResponseType(typeof(BaseResponse<IEnumerable<TeamMinimalDto>>), 200)]
+        public async Task<ActionResult<BaseResponse<IEnumerable<TeamMinimalDto>>>> GetTeamsMinimal()
+        {
+            try
+            {
+                var teams = await _teamService.GetTeamsMinimalAsync();
+                return Ok(BaseResponse<IEnumerable<TeamMinimalDto>>.Success(teams, "Minimal team data retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving minimal team data");
+                return StatusCode(500, BaseResponse<IEnumerable<TeamMinimalDto>>.Failure("An error occurred while retrieving minimal team data"));
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<BaseResponse<TeamDto>>> GetTeamById(Guid id)
         {

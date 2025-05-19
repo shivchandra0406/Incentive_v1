@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-
 using Incentive.Core.Entities;
 using Incentive.Core.Interfaces;
 using Mapster;
@@ -315,6 +314,21 @@ namespace Incentive.Infrastructure.Identity
                 .ToListAsync();
 
             return users.Select(MapToApplicationUser).ToList();
+        }
+
+        public async Task<IEnumerable<object>> GetUsersMinimalAsync()
+        {
+            var users = await _userManager.Users
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.UserName)
+                .Select(u => new 
+                {
+                    Id = u.Id,
+                    Name = $"{u.FirstName} {u.LastName}"
+                })
+                .ToListAsync();
+
+            return users;
         }
 
         public async Task<(bool Succeeded, string Message)> UpdateUserAsync(string userId, string email, string firstName, string lastName, bool? isActive)

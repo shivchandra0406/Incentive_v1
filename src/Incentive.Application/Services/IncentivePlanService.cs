@@ -103,6 +103,7 @@ namespace Incentive.Application.Services
                     p.DeletedBy,
                     p.DeletedAt,
                     p.PlanDiscriminator
+                    
                 })
                 .OrderByDescending(p => p.CreatedAt);
 
@@ -124,7 +125,9 @@ namespace Incentive.Application.Services
                 CreatedBy = p.CreatedBy.ToString(),
                 CreatedAt = p.CreatedAt,
                 LastModifiedBy = p.LastModifiedBy.ToString(),
-                LastModifiedAt = p.LastModifiedAt
+                LastModifiedAt = p.LastModifiedAt,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate
             }).ToList();
 
             return result;
@@ -219,6 +222,22 @@ namespace Incentive.Application.Services
             await _dbContext.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<IEnumerable<IncentivePlanMinimalDto>> GetIncentivePlansMinimalAsync()
+        {
+            var plans = await _dbContext.IncentivePlans
+                .Where(p => !p.IsDeleted)
+                .AsNoTracking()
+                .OrderBy(p => p.PlanName)
+                .Select(p => new IncentivePlanMinimalDto
+                {
+                    Id = p.Id,
+                    PlanName = p.PlanName
+                })
+                .ToListAsync();
+
+            return plans;
         }
         #endregion
 

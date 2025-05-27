@@ -27,10 +27,6 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
                 .HasForeignKey(i => i.DealId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(i => i.IncentiveRule)
-                .WithMany(r => r.IncentiveEarnings)
-                .HasForeignKey(i => i.IncentiveRuleId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

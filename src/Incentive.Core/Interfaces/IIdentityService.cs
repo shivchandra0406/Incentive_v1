@@ -18,6 +18,12 @@ namespace Incentive.Core.Interfaces
         Task<(bool Succeeded, string Message)> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
         Task<(bool Succeeded, string Message)> ResetPasswordAsync(string userId, string newPassword);
 
+        /// <summary>
+        /// Gets a list of users with minimal data (ID and Name only)
+        /// </summary>
+        /// <returns>List of users with minimal data</returns>
+        Task<IEnumerable<object>> GetUsersMinimalAsync();
+
         // Authentication
         Task<bool> IsInRoleAsync(string userId, string role);
         Task<bool> AuthorizeAsync(string userId, string policyName);

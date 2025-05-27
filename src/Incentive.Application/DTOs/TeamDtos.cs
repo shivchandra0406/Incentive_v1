@@ -4,6 +4,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Incentive.Application.DTOs
 {
+    /// <summary>
+    /// Minimal team data containing only ID and Name
+    /// </summary>
+    public class TeamMinimalDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }
     public class TeamDto
     {
         public Guid Id { get; set; }

@@ -12,7 +12,7 @@ namespace Incentive.Core.Interfaces
         Task<IReadOnlyList<Deal>> GetDealsByStatusAsync(DealStatus status, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
-        Task<IReadOnlyList<Deal>> GetDealsByIncentiveRuleIdAsync(Guid incentiveRuleId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Deal>> GetDealsByIncentivePlanIdAsync(Guid incentivePlanId, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsByCustomerNameAsync(string customerName, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsBySourceAsync(string source, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Deal>> GetDealsWithPendingPaymentsAsync(CancellationToken cancellationToken = default);

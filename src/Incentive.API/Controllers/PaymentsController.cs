@@ -164,7 +164,7 @@ namespace Incentive.API.Controllers
             {
                 deal.Status = DealStatus.FullyPaid;
                 deal.ClosedDate = DateTime.UtcNow;
-                deal.ClosedByUserId = userId;
+                deal.ClosedByUserId = GuidUserId;
             }
 
             await _dealRepository.UpdateAsync(deal);

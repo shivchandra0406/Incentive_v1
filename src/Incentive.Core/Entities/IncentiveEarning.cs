@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Incentive.Core.Common;
+using Incentive.Core.Entities.IncentivePlan;
 using Incentive.Core.Enums;
 
 namespace Incentive.Core.Entities
@@ -10,10 +11,7 @@ namespace Incentive.Core.Entities
     public class IncentiveEarning : MultiTenantEntity
     {
         [Required]
-        public Guid IncentiveRuleId { get; set; }
-
-        [Required]
-        public new string UserId { get; set; } = string.Empty;
+        public Guid IncentivePlanId { get; set; }
 
         [Required]
         public Guid DealId { get; set; }
@@ -36,7 +34,9 @@ namespace Incentive.Core.Entities
         public string? Notes { get; set; }
 
         // Navigation properties
-        public virtual IncentiveRule? IncentiveRule { get; set; }
+        //public virtual IncentiveRule? IncentiveRule { get; set; }
+        [ForeignKey("IncentivePlanId")]
+        public virtual IncentivePlanBase? IncentivePlan { get; set; }
         public virtual Deal? Deal { get; set; }
     }
 }

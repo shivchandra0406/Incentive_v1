@@ -15,6 +15,12 @@ namespace Incentive.Application.Interfaces
         Task<List<object>> GetIncentivePlansByTypeAsync(IncentivePlanType planType);
         Task<bool> DeleteIncentivePlanAsync(Guid id);
 
+        /// <summary>
+        /// Gets a list of incentive plans with minimal data (ID and Name only)
+        /// </summary>
+        /// <returns>List of incentive plans with minimal data</returns>
+        Task<IEnumerable<IncentivePlanMinimalDto>> GetIncentivePlansMinimalAsync();
+
         // Target-based plan methods
         Task<TargetBasedIncentivePlanDto> CreateTargetBasedPlanAsync(CreateTargetBasedIncentivePlanDto createDto);
         Task<TargetBasedIncentivePlanDto> UpdateTargetBasedPlanAsync(Guid id, UpdateTargetBasedIncentivePlanDto updateDto);

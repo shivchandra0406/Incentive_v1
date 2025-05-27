@@ -97,24 +97,6 @@ namespace Incentive.Core.Entities
         public int? YearBuilt { get; set; }
 
         /// <summary>
-        /// Ownership type (freehold, leasehold, etc.)
-        /// </summary>
-        [StringLength(50)]
-        public string OwnershipDetails { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Date when the listing will expire
-        /// </summary>
-        public DateTime? ListingExpiryDate { get; set; }
-
-        /// <summary>
-        /// Unique property listing identifier
-        /// </summary>
-        [StringLength(50)]
-        public string MLSListingId { get; set; } = string.Empty;
-
-
-        /// <summary>
         /// Total value of the project
         /// </summary>
         public decimal TotalValue { get; set; }

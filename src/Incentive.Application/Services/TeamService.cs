@@ -207,5 +207,21 @@ namespace Incentive.Application.Services
 
             return true;
         }
+
+        public async Task<IEnumerable<TeamMinimalDto>> GetTeamsMinimalAsync()
+        {
+            var teams = await _dbContext.Teams
+                .Where(x => !x.IsDeleted)
+                .AsNoTracking()
+                .OrderBy(t => t.Name)
+                .Select(t => new TeamMinimalDto
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                })
+                .ToListAsync();
+
+            return teams;
+        }
     }
 }

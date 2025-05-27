@@ -81,13 +81,6 @@ namespace Incentive.Infrastructure.Data.EntityConfigurations
             builder.Property(d => d.Notes)
                 .HasMaxLength(2000);
 
-            // No Project or Salesperson relationships
-
-            builder.HasOne(d => d.AssignedRule)
-                .WithMany(r => r.Deals)
-                .HasForeignKey(d => d.IncentiveRuleId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Configure relationships with child entities
             builder.HasMany(d => d.Payments)
                 .WithOne(p => p.Deal)

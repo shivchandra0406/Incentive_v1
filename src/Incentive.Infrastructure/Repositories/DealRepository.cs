@@ -30,7 +30,7 @@ namespace Incentive.Infrastructure.Repositories
         public async Task<IReadOnlyList<Deal>> GetDealsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Deals
-                .Where(d => d.UserId == userId.ToString() || d.ClosedByUserId == userId.ToString())
+                .Where(d => d.UserId == userId || d.ClosedByUserId == userId)
                 .Include(d => d.Payments)
                 .Include(d => d.Activities)
                 .ToListAsync(cancellationToken);
@@ -45,10 +45,10 @@ namespace Incentive.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Deal>> GetDealsByIncentiveRuleIdAsync(Guid incentiveRuleId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Deal>> GetDealsByIncentivePlanIdAsync(Guid incentivePlanId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Deals
-                .Where(d => d.IncentiveRuleId == incentiveRuleId)
+                .Where(d => d.IncentivePlanId == incentivePlanId)
                 .Include(d => d.Payments)
                 .Include(d => d.Activities)
                 .ToListAsync(cancellationToken);

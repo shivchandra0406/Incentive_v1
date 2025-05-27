@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Incentive.Core.Common;
+using Incentive.Core.Entities.IncentivePlan;
 using Incentive.Core.Enums;
 
 namespace Incentive.Core.Entities
@@ -45,7 +46,7 @@ namespace Incentive.Core.Entities
 
         [Required]
         [StringLength(50)]
-        public string CurrencyType { get; set; } = string.Empty; // Currency used for this deal
+        public CurrencyType CurrencyType { get; set; } 
 
         [Column(TypeName = "decimal(5, 2)")]
         public decimal TaxPercentage { get; set; } = 0;
@@ -61,14 +62,14 @@ namespace Incentive.Core.Entities
         public DealStatus Status { get; set; }
 
         [Required]
-        public DateTime DealDate { get; set; } // Date when the deal was created
+        public DateTime DealDate { get; set; } 
 
-        public DateTime? ClosedDate { get; set; } // Date when the deal was closed (won or lost)
+        public DateTime? ClosedDate { get; set; }
 
-        public DateTime? PaymentDueDate { get; set; } // When payment is due
+        public DateTime? PaymentDueDate { get; set; }
 
         // Who closed the deal
-        public string? ClosedByUserId { get; set; }
+        public Guid? ClosedByUserId { get; set; }
 
         // Team attribution
         public Guid? TeamId { get; set; }
@@ -91,22 +92,23 @@ namespace Incentive.Core.Entities
         // Source and Attribution
         [Required]
         [StringLength(100)]
-        public string Source { get; set; } = string.Empty; // How the lead was generated (e.g., Website, Referral, Cold Call)
+        public string Source { get; set; } = string.Empty;
 
         // Associated incentive rule
-        public Guid? IncentiveRuleId { get; set; }
+        //public Guid? IncentiveRuleId { get; set; }
 
-        [ForeignKey("IncentiveRuleId")]
-        public virtual IncentiveRule? AssignedRule { get; set; }
+        //[ForeignKey("IncentiveRuleId")]
+        //public virtual IncentiveRule? AssignedRule { get; set; }
+        public Guid IncentivePlanId { get; set; }
+
+        [ForeignKey("IncentivePlanId")]
+        public virtual IncentivePlanBase? IncentivePlan { get; set; }
 
         // Notes and additional context
         [StringLength(2000)]
         public string? Notes { get; set; }
 
         public int? RecurringFrequencyMonths { get; set; }
-
-        // User relationship (who created/owns the deal)
-        public new string? UserId { get; set; }
 
         // Payment tracking
         public virtual ICollection<Payment> Payments { get; set; } = [];

@@ -20,6 +20,9 @@ namespace Incentive.Application.Mappings
             CreateMap<CreateDealDto, Deal>();
             CreateMap<UpdateDealDto, Deal>();
 
+            // Deal Minimal DTO
+            CreateMap<Deal, DealMinimalDto>();
+
             // Payment mappings
             CreateMap<Payment, PaymentDto>();
             CreateMap<CreatePaymentDto, Payment>();

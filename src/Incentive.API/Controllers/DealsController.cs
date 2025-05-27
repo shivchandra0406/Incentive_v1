@@ -47,6 +47,27 @@ namespace Incentive.API.Controllers
             return Ok(BaseResponse<IEnumerable<DealDto>>.Success(dealDtos));
         }
 
+        /// <summary>
+        /// Get minimal deal data (ID and Name only)
+        /// </summary>
+        /// <returns>List of deals with minimal data</returns>
+        [HttpGet("minimal")]
+        [ProducesResponseType(typeof(BaseResponse<IEnumerable<DealMinimalDto>>), 200)]
+        public async Task<ActionResult<BaseResponse<IEnumerable<DealMinimalDto>>>> GetDealsMinimal()
+        {
+            try
+            {
+                var deals = await _dealRepository.GetAllAsync();
+                var dealDtos = _mapper.Map<IEnumerable<DealMinimalDto>>(deals);
+                return Ok(BaseResponse<IEnumerable<DealMinimalDto>>.Success(dealDtos, "Minimal deal data retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving minimal deal data");
+                return StatusCode(500, BaseResponse<IEnumerable<DealMinimalDto>>.Failure("An error occurred while retrieving minimal deal data"));
+            }
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -95,11 +116,11 @@ namespace Incentive.API.Controllers
             return Ok(BaseResponse<IEnumerable<DealDto>>.Success(dealDtos));
         }
 
-        [HttpGet("incentive-rule/{incentiveRuleId}")]
+        [HttpGet("incentive-plan/{incentivePlanId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<BaseResponse<IEnumerable<DealDto>>>> GetDealsByIncentiveRuleId(Guid incentiveRuleId)
+        public async Task<ActionResult<BaseResponse<IEnumerable<DealDto>>>> GetDealsByIncentivePlanId(Guid incentivePlanId)
         {
-            var deals = await _dealRepository.GetDealsByIncentiveRuleIdAsync(incentiveRuleId);
+            var deals = await _dealRepository.GetDealsByIncentivePlanIdAsync(incentivePlanId);
             var dealDtos = _mapper.Map<IEnumerable<DealDto>>(deals);
             return Ok(BaseResponse<IEnumerable<DealDto>>.Success(dealDtos));
         }

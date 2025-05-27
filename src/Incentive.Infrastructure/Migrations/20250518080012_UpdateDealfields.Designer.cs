@@ -3,6 +3,7 @@ using System;
 using Incentive.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Incentive.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250518080012_UpdateDealfields")]
+    partial class UpdateDealfields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,9 +44,10 @@ namespace Incentive.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("CurrencyType")
+                    b.Property<string>("CurrencyType")
+                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("integer");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("CustomerAddress")
                         .HasMaxLength(500)
@@ -679,15 +683,28 @@ namespace Incentive.Infrastructure.Migrations
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ListingExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("MLSListingId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("OwnershipDetails")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
